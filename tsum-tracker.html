@@ -14,6 +14,10 @@
   .header-left .days span { color: #f5c518; font-weight: 700; }
   .sync-btn-main { background: #a07bff; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 700; cursor: pointer; font-size: 13px; }
   .sync-btn-main:disabled { opacity: 0.6; }
+  .sync-row { display: flex; gap: 6px; margin-top: 0; }
+  .sync-up { background: #1a3a1a; color: #7fff7f; border: 1px solid #2d6a2d; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; font-size: 12px; }
+  .sync-down { background: #1a1a3a; color: #7fbfff; border: 1px solid #2d4a8a; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; font-size: 12px; }
+  .sync-up:disabled, .sync-down:disabled { opacity: 0.5; cursor: default; }
   .save-msg { font-size: 10px; margin-top: 4px; text-align: right; min-height: 14px; }
   .tabs { display: flex; background: #0d0d1a; border-bottom: 1px solid #1a1a2e; }
   .tab { flex: 1; padding: 10px 2px; background: none; border: none; border-bottom: 2px solid transparent; color: #555; font-size: 10px; font-weight: 700; text-transform: capitalize; cursor: pointer; }
@@ -93,7 +97,10 @@
     <div class="days">Termina en <span id="daysLeft">—</span> días</div>
   </div>
   <div>
-    <button class="sync-btn-main" id="syncBtn" onclick="sync()">☁️ Sync</button>
+    <div class="sync-row">
+      <button class="sync-up" id="syncUpBtn" onclick="sync()">☁️ Subir</button>
+      <button class="sync-down" id="syncDownBtn" onclick="syncDown()">⬇️ Bajar</button>
+    </div>
     <div class="save-msg" id="saveMsg"></div>
   </div>
 </div>
@@ -355,57 +362,54 @@ function updateCharPct(id, val) {
 }
 
 // ── Sync ───────────────────────────────────────────────────────────────────────
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxnQraloNipjplvj32NmSCwdeCKqMEXXVnn3n39OEdg7ToC0SBMjnUyEpDCRGykTlos/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznMEKIiCMjSSCPkC0LgRw9tgZc42zull48elcHcxR2QZk1iTVy8OiJxpwSV_GnDdSV/exec";
 
-function setSyncMsg(text, color) {
-  const el = document.getElementById("saveMsg");
-  el.style.color = color;
-  el.textContent = text;
-  if (text) setTimeout(() => { if (el.textContent === text) el.textContent = ""; }, 3000);
+function setSyncBtns(disabled) {
+  document.getElementById("syncUpBtn").disabled = disabled;
+  document.getElementById("syncDownBtn").disabled = disabled;
 }
 
 async function sync() {
-  const btn = document.getElementById("syncBtn");
-  btn.disabled = true;
-  setSyncMsg("⏳ Sincronizando...", "#aaa");
+  setSyncBtns(true);
+  setSyncMsg("⏳ Subiendo...", "#aaa");
   try {
-    // First read remote to compare
-    const readUrl = APPS_SCRIPT_URL + "?action=read&sheet=Mayo%202026";
-    const readRes = await fetch(readUrl);
-    const readJson = await readRes.json();
-
-    let remoteLog = readJson.ok && readJson.data && readJson.data.log ? readJson.data.log : [];
-    let localLog = state.log;
-
-    // Determine which is newer by latest timestamp
-    const latestLocal = localLog.length ? Math.max(...localLog.map(e => e.ts || 0)) : 0;
-    const latestRemote = remoteLog.length ? Math.max(...remoteLog.map(e => e.ts || 0)) : 0;
-
-    if (latestRemote > latestLocal) {
-      // Remote is newer — pull
-      state = readJson.data;
+    const writeRes = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ action: "write", data: state }),
+    });
+    const writeJson = await writeRes.json();
+    if (writeJson.ok) {
       saveLocal();
-      render();
-      setSyncMsg("⬇️ Actualizado desde Sheets", "#7fbfff");
+      setSyncMsg("☁️ Guardado en Sheets", "#7fff7f");
     } else {
-      // Local is newer or equal — push
-      const writeRes = await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({ action: "write", sheet: "Mayo 2026", data: state }),
-      });
-      const writeJson = await writeRes.json();
-      if (writeJson.ok) {
-        saveLocal();
-        setSyncMsg("☁️ Guardado en Sheets", "#7fff7f");
-      } else {
-        setSyncMsg("✗ Error: " + writeJson.error, "#ff6b6b");
-      }
+      setSyncMsg("✗ Error: " + writeJson.error, "#ff6b6b");
     }
   } catch(e) {
     setSyncMsg("✗ " + e.message, "#ff6b6b");
   } finally {
-    btn.disabled = false;
+    setSyncBtns(false);
+  }
+}
+
+async function syncDown() {
+  setSyncBtns(true);
+  setSyncMsg("⏳ Bajando...", "#aaa");
+  try {
+    const res = await fetch(APPS_SCRIPT_URL);
+    const json = await res.json();
+    if (json.ok && json.data) {
+      state = json.data;
+      saveLocal();
+      render();
+      setSyncMsg("⬇️ Datos bajados de Sheets", "#7fbfff");
+    } else {
+      setSyncMsg("✗ Sin datos en Sheets", "#ff6b6b");
+    }
+  } catch(e) {
+    setSyncMsg("✗ " + e.message, "#ff6b6b");
+  } finally {
+    setSyncBtns(false);
   }
 }
 
