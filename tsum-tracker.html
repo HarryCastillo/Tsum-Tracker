@@ -12,14 +12,9 @@
   .header-left .month { font-size: 20px; font-weight: 800; margin-top: 2px; }
   .header-left .days { font-size: 11px; color: #888; margin-top: 2px; }
   .header-left .days span { color: #f5c518; font-weight: 700; }
-  .save-btn { background: #a07bff; color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; cursor: pointer; font-size: 12px; }
-  .save-btn:disabled { opacity: 0.6; }
-  .save-msg { font-size: 10px; margin-top: 4px; text-align: right; }
-  .sync-row { display: flex; gap: 6px; margin-top: 6px; }
-  .sync-btn { flex: 1; border: none; border-radius: 8px; padding: 6px 8px; font-weight: 700; cursor: pointer; font-size: 11px; }
-  .sync-up { background: #1a3a1a; color: #7fff7f; border: 1px solid #2d6a2d; }
-  .sync-down { background: #1a1a3a; color: #7fbfff; border: 1px solid #2d4a8a; }
-  .sync-btn:disabled { opacity: 0.5; cursor: default; }
+  .sync-btn-main { background: #a07bff; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 700; cursor: pointer; font-size: 13px; }
+  .sync-btn-main:disabled { opacity: 0.6; }
+  .save-msg { font-size: 10px; margin-top: 4px; text-align: right; min-height: 14px; }
   .tabs { display: flex; background: #0d0d1a; border-bottom: 1px solid #1a1a2e; }
   .tab { flex: 1; padding: 10px 2px; background: none; border: none; border-bottom: 2px solid transparent; color: #555; font-size: 10px; font-weight: 700; text-transform: capitalize; cursor: pointer; }
   .tab.active { color: #a07bff; border-bottom-color: #a07bff; }
@@ -27,8 +22,10 @@
   .card { background: linear-gradient(135deg,#1a1a2e,#16213e); border: 1px solid #2a2a4e; border-radius: 12px; padding: 14px; }
   .card-label { font-size: 10px; color: #a07bff; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
   .coins-input { width: 100%; background: #0d0d1a; color: #f5c518; border: 1px solid #333; border-radius: 8px; padding: 6px 10px; font-size: 16px; font-weight: 800; margin-bottom: 8px; }
-  .apply-btn { width: 100%; background: #a07bff; color: #fff; border: none; border-radius: 8px; padding: 8px; font-weight: 700; cursor: pointer; font-size: 14px; }
+  .apply-btn { width: 100%; background: #a07bff; color: #fff; border: none; border-radius: 8px; padding: 10px; font-weight: 700; cursor: pointer; font-size: 15px; }
   .coins-sub { font-size: 10px; color: #555; margin-top: 4px; }
+  .log-input { width: 100%; background: #0d0d1a; color: #e8e8ff; border: 1px solid #333; border-radius: 8px; padding: 8px 10px; font-size: 12px; margin-top: 8px; }
+  .log-hint { font-size: 10px; color: #555; margin-top: 6px; }
   .stat-row { display: flex; gap: 8px; }
   .stat-box { background: linear-gradient(135deg,#1a1a2e,#16213e); border: 1px solid #2a2a4e; border-radius: 12px; padding: 12px 10px; flex: 1; }
   .stat-label { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -40,10 +37,6 @@
   .track-icon { font-size: 20px; }
   .track-title { font-weight: 700; font-size: 14px; }
   .track-sub { font-size: 10px; color: #666; margin-top: 4px; }
-  .log-row { display: flex; gap: 8px; }
-  .log-input { flex: 1; background: #0d0d1a; color: #e8e8ff; border: 1px solid #333; border-radius: 8px; padding: 8px 10px; font-size: 12px; }
-  .log-btn { background: #a07bff; color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; cursor: pointer; }
-  .log-hint { font-size: 10px; color: #555; margin-top: 6px; }
   .ticket-row { display: flex; gap: 10px; align-items: center; }
   .ticket-btn { background: #2a2a4e; color: #fff; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; font-size: 18px; }
   .ticket-count { font-size: 28px; font-weight: 800; color: #f5c518; flex: 1; text-align: center; }
@@ -64,8 +57,7 @@
   .char-stat-value { font-size: 18px; font-weight: 800; }
   .char-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
   .char-controls label { font-size: 10px; color: #888; }
-  .char-select, .char-pct { background: #1a1a2e; color: #e8e8ff; border: 1px solid #444; border-radius: 6px; padding: 2px 6px; font-size: 12px; }
-  .char-pct { width: 52px; }
+  .char-pct-input { background: #1a1a2e; color: #e8e8ff; border: 1px solid #444; border-radius: 6px; padding: 4px 8px; font-size: 14px; width: 70px; }
   .total-card { background: linear-gradient(135deg,#1a1a2e,#16213e); border: 1px solid #2a2a4e; border-radius: 12px; padding: 14px; }
   .total-row { display: flex; gap: 10px; }
   .total-item { flex: 1; text-align: center; }
@@ -101,11 +93,7 @@
     <div class="days">Termina en <span id="daysLeft">—</span> días</div>
   </div>
   <div>
-    <button class="save-btn" id="saveBtn" onclick="saveData()">💾 Guardar</button>
-    <div class="sync-row">
-      <button class="sync-btn sync-up" id="syncUpBtn" onclick="syncUp()">☁️ Subir</button>
-      <button class="sync-btn sync-down" id="syncDownBtn" onclick="syncDown()">⬇️ Bajar</button>
-    </div>
+    <button class="sync-btn-main" id="syncBtn" onclick="sync()">☁️ Sync</button>
     <div class="save-msg" id="saveMsg"></div>
   </div>
 </div>
@@ -120,28 +108,21 @@
 <!-- DASHBOARD -->
 <div id="tab-dashboard" class="content">
   <div class="card">
-    <div class="card-label">Saldo Actual</div>
+    <div class="card-label">Registrar Saldo</div>
     <input type="number" class="coins-input" id="coinInput" value="468000">
-    <button class="apply-btn" onclick="applyCoins()">✓ Aplicar</button>
+    <input type="text" class="log-input" id="logNote" placeholder="Nota (opcional)">
+    <button class="apply-btn" onclick="applyAndLog()" style="margin-top:8px">✓ Aplicar y Registrar</button>
     <div class="coins-sub" id="coinsSub">468,000 monedas</div>
   </div>
   <div class="stat-row">
     <div class="stat-box"><div class="stat-label">Faltan</div><div class="stat-value" id="statFaltan" style="color:#ff6b6b">—</div><div class="stat-sub" id="statFaltanSub">— cajas</div></div>
-    <div class="stat-box"><div class="stat-label">Prom/día</div><div class="stat-value" id="statProm" style="color:#f5c518">—</div><div class="stat-sub" id="statPromSub">— regs</div></div>
+    <div class="stat-box"><div class="stat-label">Prom/día</div><div class="stat-value" id="statProm" style="color:#f5c518">—</div><div class="stat-sub" id="statPromSub">— días</div></div>
     <div class="stat-box"><div class="stat-label">Proyect.</div><div class="stat-value" id="statProyect" style="color:#ff8c42">—</div><div class="stat-sub" id="statProyectSub">— días</div></div>
   </div>
   <div class="track-box bad" id="trackBox">
     <div class="track-icon" id="trackIcon">🔴</div>
     <div class="track-title" id="trackTitle">Por debajo del objetivo</div>
     <div class="track-sub" id="trackSub">—</div>
-  </div>
-  <div class="card">
-    <div class="card-label">Registrar</div>
-    <div class="log-row">
-      <input type="text" class="log-input" id="logNote" placeholder="Nota (opcional)">
-      <button class="log-btn" onclick="addLog()">+ Log</button>
-    </div>
-    <div class="log-hint">Guarda el saldo actual con timestamp</div>
   </div>
   <div class="card">
     <div class="card-label">Premium Tickets</div>
@@ -156,7 +137,7 @@
 
 <!-- PERSONAJES -->
 <div id="tab-personajes" class="content hidden">
-  <div style="font-size:11px;color:#666">Actualiza skill y % · se guarda con 💾</div>
+  <div style="font-size:11px;color:#666">Actualiza el % · al llegar a 100 el skill sube solo</div>
   <div id="charCards"></div>
   <div class="total-card">
     <div class="card-label">Total</div>
@@ -208,11 +189,11 @@ const INITIAL_CHARS = [
   { id:"epg",   name:"Elite Praetorian Guard", skillCurrent:4, skillMax:6, skillPct:42, upgrades:[1,1,2,4,8,16] },
 ];
 const INITIAL_LOG = [
-  { date:"Jue 22", coins:75111, note:"Inicio" },
-  { date:"Vie 23", coins:127000, note:"" },
-  { date:"Sáb 24 AM", coins:560000, note:"Día fuerte +Coin" },
-  { date:"Sáb 24 PM", coins:375000, note:"Cajas abiertas" },
-  { date:"Dom 24", coins:468000, note:"" },
+  { ts: new Date("2026-05-22T14:00:00").getTime(), coins:75111,  note:"Inicio" },
+  { ts: new Date("2026-05-23T20:00:00").getTime(), coins:127000, note:"" },
+  { ts: new Date("2026-05-24T09:00:00").getTime(), coins:560000, note:"Día fuerte +Coin" },
+  { ts: new Date("2026-05-24T18:00:00").getTime(), coins:375000, note:"Cajas abiertas" },
+  { ts: new Date("2026-05-24T22:00:00").getTime(), coins:468000, note:"" },
 ];
 
 let state = {
@@ -228,19 +209,35 @@ let state = {
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) state = JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Migrate old log entries that have string dates instead of timestamps
+      if (parsed.log) {
+        parsed.log = parsed.log.map(e => {
+          if (e.ts) return e;
+          // Try to parse old date string — fallback to now
+          return { ts: Date.now(), coins: e.coins, note: e.note || e.date || "" };
+        });
+      }
+      state = parsed;
+    }
   } catch(e) {}
 }
-function saveData() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    document.getElementById("saveMsg").style.color = "#7fff7f";
-    document.getElementById("saveMsg").textContent = "✓ Guardado";
-    setTimeout(() => document.getElementById("saveMsg").textContent = "", 2000);
-  } catch(e) {
-    document.getElementById("saveMsg").style.color = "#ff6b6b";
-    document.getElementById("saveMsg").textContent = "✗ Error";
-  }
+function saveLocal() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+// ── Date helpers ───────────────────────────────────────────────────────────────
+function fmtDate(ts) {
+  const d = new Date(ts);
+  const days = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+  const h = d.getHours().toString().padStart(2,"0");
+  const m = d.getMinutes().toString().padStart(2,"0");
+  return `${days[d.getDay()]} ${d.getDate()} ${h}:${m}`;
+}
+function dayKey(ts) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
 // ── Calc ───────────────────────────────────────────────────────────────────────
@@ -260,13 +257,25 @@ function daysLeft() {
 }
 function avgDaily() {
   if (state.log.length < 2) return 0;
-  const deltas = [];
-  for (let i = 1; i < state.log.length; i++) {
-    const d = state.log[i].coins - state.log[i-1].coins;
-    if (d > 0) deltas.push(d);
+  // Group by calendar day, take first and last entry per day
+  const byDay = {};
+  state.log.forEach(e => {
+    const k = dayKey(e.ts);
+    if (!byDay[k]) byDay[k] = { first: e.coins, last: e.coins };
+    byDay[k].last = e.coins;
+  });
+  const dayKeys = Object.keys(byDay).sort();
+  if (dayKeys.length < 2) return 0;
+  // Net gain per day (only positive days count)
+  const gains = [];
+  for (let i = 1; i < dayKeys.length; i++) {
+    const prev = byDay[dayKeys[i-1]].last;
+    const curr = byDay[dayKeys[i]].last;
+    const delta = curr - prev;
+    if (delta > 0) gains.push(delta);
   }
-  if (deltas.length === 0) return 0;
-  return Math.round(deltas.reduce((a,b) => a+b, 0) / deltas.length);
+  if (gains.length === 0) return 0;
+  return Math.round(gains.reduce((a,b) => a+b, 0) / gains.length);
 }
 function fmt(n) { return n > 999999 ? (n/1000000).toFixed(1)+"M" : n.toLocaleString("es-MX"); }
 
@@ -280,32 +289,88 @@ function showTab(name, btn) {
 }
 
 // ── Actions ────────────────────────────────────────────────────────────────────
-function applyCoins() {
+function applyAndLog() {
   const v = +document.getElementById("coinInput").value;
-  if (!isNaN(v)) { state.coins = v; render(); }
-}
-function addLog() {
-  const now = new Date();
-  const label = now.toLocaleDateString("es-MX",{weekday:"short",day:"numeric"}) + " " + now.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
-  const note = document.getElementById("logNote").value;
-  state.log.push({ date: label, coins: state.coins, note });
+  if (isNaN(v)) return;
+  state.coins = v;
+  const note = document.getElementById("logNote").value.trim();
+  state.log.push({ ts: Date.now(), coins: v, note });
   document.getElementById("logNote").value = "";
+  saveLocal();
   render();
 }
-function deleteLog(idx) { state.log.splice(idx,1); render(); }
-function changeTickets(d) { state.premiumTickets = Math.max(0, state.premiumTickets + d); render(); }
+function deleteLog(idx) { state.log.splice(idx,1); saveLocal(); render(); }
+function changeTickets(d) { state.premiumTickets = Math.max(0, state.premiumTickets + d); saveLocal(); render(); }
 function changeBoxes(d) {
   state.selectBoxesOpened = Math.max(0, state.selectBoxesOpened + d);
   state.selectBoxCoinsSpent = Math.max(0, state.selectBoxCoinsSpent + d * 30000);
-  render();
-}
-function updateCharSkill(id, val) {
-  const c = state.chars.find(c => c.id === id);
-  if (c) { c.skillCurrent = +val; c.skillPct = 0; render(); }
+  saveLocal(); render();
 }
 function updateCharPct(id, val) {
   const c = state.chars.find(c => c.id === id);
-  if (c) { c.skillPct = Math.min(99, Math.max(0, +val || 0)); render(); }
+  if (!c) return;
+  let pct = Math.max(0, +val || 0);
+  if (pct >= 100 && c.skillCurrent < c.skillMax) {
+    c.skillCurrent += 1;
+    pct = 0;
+  }
+  c.skillPct = Math.min(99, pct);
+  saveLocal(); render();
+}
+
+// ── Sync ───────────────────────────────────────────────────────────────────────
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxnQraloNipjplvj32NmSCwdeCKqMEXXVnn3n39OEdg7ToC0SBMjnUyEpDCRGykTlos/exec";
+
+function setSyncMsg(text, color) {
+  const el = document.getElementById("saveMsg");
+  el.style.color = color;
+  el.textContent = text;
+  if (text) setTimeout(() => { if (el.textContent === text) el.textContent = ""; }, 3000);
+}
+
+async function sync() {
+  const btn = document.getElementById("syncBtn");
+  btn.disabled = true;
+  setSyncMsg("⏳ Sincronizando...", "#aaa");
+  try {
+    // First read remote to compare
+    const readUrl = APPS_SCRIPT_URL + "?action=read&sheet=Mayo%202026";
+    const readRes = await fetch(readUrl);
+    const readJson = await readRes.json();
+
+    let remoteLog = readJson.ok && readJson.data && readJson.data.log ? readJson.data.log : [];
+    let localLog = state.log;
+
+    // Determine which is newer by latest timestamp
+    const latestLocal = localLog.length ? Math.max(...localLog.map(e => e.ts || 0)) : 0;
+    const latestRemote = remoteLog.length ? Math.max(...remoteLog.map(e => e.ts || 0)) : 0;
+
+    if (latestRemote > latestLocal) {
+      // Remote is newer — pull
+      state = readJson.data;
+      saveLocal();
+      render();
+      setSyncMsg("⬇️ Actualizado desde Sheets", "#7fbfff");
+    } else {
+      // Local is newer or equal — push
+      const writeRes = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ action: "write", sheet: "Mayo 2026", data: state }),
+      });
+      const writeJson = await writeRes.json();
+      if (writeJson.ok) {
+        saveLocal();
+        setSyncMsg("☁️ Guardado en Sheets", "#7fff7f");
+      } else {
+        setSyncMsg("✗ Error: " + writeJson.error, "#ff6b6b");
+      }
+    }
+  } catch(e) {
+    setSyncMsg("✗ " + e.message, "#ff6b6b");
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ── Render ─────────────────────────────────────────────────────────────────────
@@ -316,18 +381,16 @@ function render() {
   const avg = avgDaily();
   const proj = state.coins + avg * days;
   const onTrack = proj >= coinsReq;
+  const uniqueDays = new Set(state.log.map(e => dayKey(e.ts))).size;
 
-  // Header
   document.getElementById("daysLeft").textContent = days;
-
-  // Dashboard
   document.getElementById("coinInput").value = state.coins;
   document.getElementById("coinsSub").textContent = state.coins.toLocaleString("es-MX") + " monedas";
   document.getElementById("statFaltan").textContent = fmt(falta);
   document.getElementById("statFaltan").style.color = falta === 0 ? "#7fff7f" : "#ff6b6b";
   document.getElementById("statFaltanSub").textContent = Math.ceil(falta/30000) + " cajas";
   document.getElementById("statProm").textContent = avg > 0 ? fmt(avg) : "—";
-  document.getElementById("statPromSub").textContent = state.log.length + " regs";
+  document.getElementById("statPromSub").textContent = uniqueDays + " días";
   document.getElementById("statProyect").textContent = fmt(proj);
   document.getElementById("statProyect").style.color = onTrack ? "#7fff7f" : "#ff8c42";
   document.getElementById("statProyectSub").textContent = days + " días";
@@ -335,7 +398,7 @@ function render() {
   document.getElementById("trackIcon").textContent = onTrack ? "🟢" : "🔴";
   document.getElementById("trackTitle").textContent = onTrack ? "¡En camino!" : "Por debajo del objetivo";
   document.getElementById("trackTitle").style.color = onTrack ? "#7fff7f" : "#ff6b6b";
-  document.getElementById("trackSub").textContent = "Necesitas " + coinsReq.toLocaleString("es-MX") + " · Proyectado " + proj.toLocaleString("es-MX");
+  document.getElementById("trackSub").textContent = "Necesitas " + coinsReq.toLocaleString("es-MX") + " · Proyectado " + fmt(proj);
   document.getElementById("ticketCount").textContent = state.premiumTickets;
   document.getElementById("ticketSub").textContent = "≈ " + (state.premiumTickets * 30000).toLocaleString("es-MX") + " monedas";
 
@@ -351,7 +414,6 @@ function render() {
     div.className = "char-card " + (isMax ? "maxed" : "normal");
     div.style.marginBottom = "12px";
 
-    // Skill bar HTML
     let barHTML = '<div class="skill-bar">';
     for (let i = 0; i < c.skillMax; i++) {
       if (i < c.skillCurrent - 1) {
@@ -364,8 +426,6 @@ function render() {
     }
     barHTML += `<span class="skill-level-text">${c.skillCurrent}/${c.skillMax}</span></div>`;
 
-    const selectOptions = Array.from({length:c.skillMax},(_,i)=>i+1).map(v=>`<option value="${v}" ${v===c.skillCurrent?"selected":""}>${v}</option>`).join("");
-
     div.innerHTML = `
       ${isMax ? '<div class="char-max-badge">MAX ✓</div>' : ''}
       <div class="char-name">${c.name}</div>
@@ -375,10 +435,8 @@ function render() {
         <div class="char-stat"><div class="char-stat-label">Monedas</div><div class="char-stat-value" style="color:${isMax?"#7fff7f":"#ff8c42"};font-size:14px">${(dups*30000).toLocaleString("es-MX")}</div></div>
       </div>
       ${!isMax ? `<div class="char-controls">
-        <label>Skill:</label>
-        <select class="char-select" onchange="updateCharSkill('${c.id}',this.value)">${selectOptions}</select>
         <label>Barra %:</label>
-        <input type="text" inputmode="numeric" class="char-pct" value="${c.skillPct}" onchange="updateCharPct('${c.id}',this.value)">
+        <input type="text" inputmode="numeric" class="char-pct-input" value="${c.skillPct}" onchange="updateCharPct('${c.id}',this.value)" placeholder="0–99">
       </div>` : ''}
     `;
     charContainer.appendChild(div);
@@ -409,7 +467,7 @@ function render() {
     div.className = "hist-entry";
     div.innerHTML = `
       <div style="flex:1">
-        <div class="hist-date">${e.date}</div>
+        <div class="hist-date">${fmtDate(e.ts)}</div>
         ${e.note ? `<div class="hist-note">${e.note}</div>` : ""}
       </div>
       <div class="hist-right">
@@ -420,66 +478,6 @@ function render() {
     `;
     histList.appendChild(div);
   });
-}
-
-// ── Sync ───────────────────────────────────────────────────────────────────────
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxnQraloNipjplvj32NmSCwdeCKqMEXXVnn3n39OEdg7ToC0SBMjnUyEpDCRGykTlos/exec";
-
-function setSyncMsg(text, color) {
-  const el = document.getElementById("saveMsg");
-  el.style.color = color;
-  el.textContent = text;
-  if (text) setTimeout(() => { if (el.textContent === text) el.textContent = ""; }, 3000);
-}
-function setSyncBtns(disabled) {
-  document.getElementById("syncUpBtn").disabled = disabled;
-  document.getElementById("syncDownBtn").disabled = disabled;
-  document.getElementById("saveBtn").disabled = disabled;
-}
-
-async function syncUp() {
-  setSyncBtns(true);
-  setSyncMsg("⏳ Subiendo...", "#aaa");
-  try {
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify({ action: "write", sheet: "Mayo 2026", data: state }),
-    });
-    const json = await res.json();
-    if (json.ok) {
-      saveData();
-      setSyncMsg("☁️ Subido a Sheets", "#7fff7f");
-    } else {
-      setSyncMsg("✗ Error: " + json.error, "#ff6b6b");
-    }
-  } catch(e) {
-    setSyncMsg("✗ " + e.message, "#ff6b6b");
-  } finally {
-    setSyncBtns(false);
-  }
-}
-
-async function syncDown() {
-  setSyncBtns(true);
-  setSyncMsg("⏳ Bajando...", "#aaa");
-  try {
-    const url = APPS_SCRIPT_URL + "?action=read&sheet=Mayo%202026";
-    const res = await fetch(url);
-    const json = await res.json();
-    if (json.ok && json.data) {
-      state = json.data;
-      saveData();
-      render();
-      setSyncMsg("⬇️ Datos actualizados", "#7fbfff");
-    } else {
-      setSyncMsg("✗ Sin datos en Sheet", "#ff6b6b");
-    }
-  } catch(e) {
-    setSyncMsg("✗ " + e.message, "#ff6b6b");
-  } finally {
-    setSyncBtns(false);
-  }
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────────
