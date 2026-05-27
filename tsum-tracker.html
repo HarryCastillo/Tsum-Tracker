@@ -454,7 +454,7 @@ function render() {
   document.getElementById("trackIcon").textContent = onTrack ? "🟢" : "🔴";
   document.getElementById("trackTitle").textContent = onTrack ? "¡En camino!" : "Por debajo del objetivo";
   document.getElementById("trackTitle").style.color = onTrack ? "#7fff7f" : "#ff6b6b";
-  document.getElementById("trackSub").textContent = "Necesitas " + coinsReq.toLocaleString("es-MX") + " · Proyectado " + fmt(proj);
+  document.getElementById("trackSub").textContent = "Faltan " + falta.toLocaleString("es-MX") + " · Proyectado " + fmt(proj);
   document.getElementById("ticketCount").textContent = state.premiumTickets;
   document.getElementById("ticketSub").textContent = "≈ " + (state.premiumTickets * 30000).toLocaleString("es-MX") + " monedas";
 
