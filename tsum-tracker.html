@@ -364,6 +364,13 @@ function updateCharPct(id, val) {
 // ── Sync ───────────────────────────────────────────────────────────────────────
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznMEKIiCMjSSCPkC0LgRw9tgZc42zull48elcHcxR2QZk1iTVy8OiJxpwSV_GnDdSV/exec";
 
+function setSyncMsg(text, color) {
+  const el = document.getElementById("saveMsg");
+  el.style.color = color;
+  el.textContent = text;
+  if (text) setTimeout(() => { if (el.textContent === text) el.textContent = ""; }, 3000);
+}
+
 function setSyncBtns(disabled) {
   document.getElementById("syncUpBtn").disabled = disabled;
   document.getElementById("syncDownBtn").disabled = disabled;
