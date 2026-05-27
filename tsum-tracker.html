@@ -206,18 +206,54 @@ let state = {
 };
 
 // ── Persist ────────────────────────────────────────────────────────────────────
+function migrateOldDate(dateStr) {
+  if (!dateStr) return Date.now();
+  // Full JS date string: "Thu Mar 26 2026 14:16:00 GMT-0600 (hora estándar central)"
+  const full = new Date(dateStr);
+  if (!isNaN(full.getTime())) return full.getTime();
+  // Short Spanish format: "lun 25 11:59 p.m." or "sáb 24 AM" or "vie 23" or "jue 22"
+  const spDays = { dom:0, lun:1, mar:2, "mié":3, mie:3, jue:4, vie:5, "sáb":6, sab:6 };
+  const lower = dateStr.toLowerCase().trim();
+  // Extract day number
+  const dayMatch = lower.match(/\b(\d{1,2})\b/);
+  const dayNum = dayMatch ? parseInt(dayMatch[1]) : null;
+  if (dayNum) {
+    // Build a May 2026 date
+    const d = new Date(2026, 4, dayNum); // month 4 = May
+    // Try to extract hour/minute
+    const timeMatch = lower.match(/(\d{1,2}):(\d{2})/);
+    if (timeMatch) {
+      let h = parseInt(timeMatch[1]);
+      const m = parseInt(timeMatch[2]);
+      if (lower.includes("p.m.") && h < 12) h += 12;
+      if (lower.includes("a.m.") && h === 12) h = 0;
+      d.setHours(h, m, 0, 0);
+    } else if (lower.includes("pm") || lower.includes("p.m.")) {
+      d.setHours(21, 0, 0, 0);
+    } else if (lower.includes("am") || lower.includes("a.m.")) {
+      d.setHours(9, 0, 0, 0);
+    } else {
+      d.setHours(12, 0, 0, 0);
+    }
+    return d.getTime();
+  }
+  return Date.now();
+}
+
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Migrate old log entries that have string dates instead of timestamps
       if (parsed.log) {
         parsed.log = parsed.log.map(e => {
           if (e.ts) return e;
-          // Try to parse old date string — fallback to now
-          return { ts: Date.now(), coins: e.coins, note: e.note || e.date || "" };
+          const dateStr = e.date || "";
+          const note = e.note || "";
+          return { ts: migrateOldDate(dateStr), coins: e.coins, note };
         });
+        // Sort by timestamp after migration
+        parsed.log.sort((a, b) => a.ts - b.ts);
       }
       state = parsed;
     }
