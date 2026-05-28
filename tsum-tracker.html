@@ -12,9 +12,7 @@
   .header-left .month { font-size: 20px; font-weight: 800; margin-top: 2px; color: #fff; }
   .header-left .days { font-size: 11px; color: #90b8d8; margin-top: 2px; }
   .header-left .days span { color: #f5c518; font-weight: 700; }
-  .sync-btn-main { background: #f5a623; color: #1a2a4a; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 800; cursor: pointer; font-size: 13px; }
-  .sync-btn-main:disabled { opacity: 0.6; }
-  .sync-row { display: flex; gap: 6px; margin-top: 0; }
+  .sync-row { display: flex; gap: 6px; }
   .sync-up { background: linear-gradient(135deg,#1a5c2a,#0f3a1a); color: #4dff91; border: 1px solid #2d8a4a; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; font-size: 12px; }
   .sync-down { background: linear-gradient(135deg,#0d2a5e,#1a4a8a); color: #4dd0e1; border: 1px solid #2a6abf; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; font-size: 12px; }
   .sync-up:disabled, .sync-down:disabled { opacity: 0.5; cursor: default; }
@@ -30,7 +28,6 @@
   .apply-btn:active { opacity: 0.85; }
   .coins-sub { font-size: 10px; color: #4a7aaa; margin-top: 4px; }
   .log-input { width: 100%; background: #071020; color: #e8f4ff; border: 1px solid #1a4a8a; border-radius: 8px; padding: 8px 10px; font-size: 12px; margin-top: 8px; }
-  .log-hint { font-size: 10px; color: #4a7aaa; margin-top: 6px; }
   .stat-row { display: flex; gap: 8px; }
   .stat-box { background: linear-gradient(135deg,#0d2040,#112a50); border: 1px solid #1a4a8a; border-radius: 12px; padding: 12px 10px; flex: 1; }
   .stat-label { font-size: 9px; color: #4a7aaa; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -46,10 +43,14 @@
   .ticket-btn { background: #1a3a6a; color: #e8f4ff; border: 1px solid #2a6abf; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; font-size: 18px; }
   .ticket-count { font-size: 28px; font-weight: 800; color: #f5c518; flex: 1; text-align: center; }
   .ticket-sub { font-size: 10px; color: #4a7aaa; text-align: center; margin-top: 4px; }
-  .char-card { border-radius: 12px; padding: 14px; position: relative; }
+  .month-section-title { font-size: 10px; color: #4dd0e1; letter-spacing: 2px; text-transform: uppercase; padding: 4px 0 8px 0; border-bottom: 1px solid #1a4a8a; margin-bottom: 4px; }
+  .month-section-title.archived { color: #4a7aaa; }
+  .char-card { border-radius: 12px; padding: 14px; position: relative; margin-bottom: 12px; }
   .char-card.normal { background: linear-gradient(135deg,#0d2040,#112a50); border: 1px solid #1a4a8a; }
   .char-card.maxed { background: linear-gradient(135deg,#0f3a1a,#0a2a10); border: 1px solid #2d8a4a; }
+  .char-card.archived { background: linear-gradient(135deg,#0d0d20,#0a0a18); border: 1px solid #2a2a4a; opacity: 0.6; }
   .char-max-badge { position: absolute; top: 8px; right: 10px; background: #2d8a4a; color: #4dff91; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+  .char-archived-badge { position: absolute; top: 8px; right: 10px; background: #2a2a4a; color: #4a7aaa; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
   .char-name { font-weight: 700; font-size: 13px; margin-bottom: 8px; color: #e8f4ff; }
   .skill-bar { display: flex; align-items: center; gap: 4px; }
   .skill-pip { width: 14px; height: 14px; border-radius: 3px; border: 1px solid #1a4a8a; position: relative; overflow: hidden; background: #071020; }
@@ -68,6 +69,16 @@
   .total-item { flex: 1; text-align: center; }
   .total-item-label { font-size: 10px; color: #4a7aaa; }
   .total-item-value { font-size: 24px; font-weight: 800; }
+  .capsule-card { background: linear-gradient(135deg,#0d2040,#112a50); border: 1px solid #1a4a8a; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  .capsule-card.complete { background: linear-gradient(135deg,#0f3a1a,#0a2a10); border: 1px solid #2d8a4a; }
+  .capsule-title { font-weight: 700; font-size: 13px; color: #e8f4ff; margin-bottom: 10px; }
+  .capsule-progress { display: flex; align-items: center; gap: 10px; }
+  .capsule-bar-wrap { flex: 1; background: #071020; border-radius: 6px; height: 10px; overflow: hidden; border: 1px solid #1a3a6a; }
+  .capsule-bar-fill { height: 100%; background: linear-gradient(90deg,#f5a623,#f5c518); border-radius: 6px; transition: width 0.3s; }
+  .capsule-count { font-size: 13px; font-weight: 800; color: #f5c518; min-width: 40px; text-align: right; }
+  .capsule-btns { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
+  .cap-btn { background: #1a3a6a; color: #e8f4ff; border: 1px solid #2a6abf; border-radius: 6px; width: 28px; height: 28px; cursor: pointer; font-size: 16px; }
+  .capsule-reward { font-size: 11px; color: #4dff91; margin-top: 8px; font-weight: 700; }
   .budget-row { background: linear-gradient(135deg,#0d2040,#112a50); border: 1px solid #1a4a8a; border-radius: 12px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
   .budget-label { font-weight: 600; font-size: 13px; color: #e8f4ff; }
   .budget-note { font-size: 10px; color: #4a7aaa; margin-top: 2px; }
@@ -108,7 +119,7 @@
 
 <div class="tabs">
   <button class="tab active" onclick="showTab('dashboard',this)">Dashboard</button>
-  <button class="tab" onclick="showTab('personajes',this)">Personajes</button>
+  <button class="tab" onclick="showTab('avance',this)">Avance</button>
   <button class="tab" onclick="showTab('presupuesto',this)">Presupuesto</button>
   <button class="tab" onclick="showTab('historial',this)">Historial</button>
 </div>
@@ -127,6 +138,10 @@
     <div class="stat-box"><div class="stat-label">Prom/día</div><div class="stat-value" id="statProm" style="color:#f5c518">—</div><div class="stat-sub" id="statPromSub">— días</div></div>
     <div class="stat-box"><div class="stat-label">Proyect.</div><div class="stat-value" id="statProyect" style="color:#ff8c42">—</div><div class="stat-sub" id="statProyectSub">— días</div></div>
   </div>
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-label">Hoy</div><div class="stat-value" id="statHoy" style="color:#4dff91">—</div><div class="stat-sub">ganado hoy</div></div>
+    <div class="stat-box"><div class="stat-label">Total mes</div><div class="stat-value" id="statMes" style="color:#4dd0e1">—</div><div class="stat-sub">desde inicio</div></div>
+  </div>
   <div class="track-box bad" id="trackBox">
     <div class="track-icon" id="trackIcon">🔴</div>
     <div class="track-title" id="trackTitle">Por debajo del objetivo</div>
@@ -143,17 +158,18 @@
   </div>
 </div>
 
-<!-- PERSONAJES -->
-<div id="tab-personajes" class="content hidden">
+<!-- AVANCE -->
+<div id="tab-avance" class="content hidden">
   <div style="font-size:11px;color:#666">Actualiza el % · al llegar a 100 el skill sube solo</div>
   <div id="charCards"></div>
   <div class="total-card">
-    <div class="card-label">Total</div>
+    <div class="card-label">Total activos</div>
     <div class="total-row">
       <div class="total-item"><div class="total-item-label">Dups totales</div><div class="total-item-value" id="totalDups" style="color:#f5c518">—</div></div>
       <div class="total-item"><div class="total-item-label">Monedas</div><div class="total-item-value" id="totalCoins" style="color:#ff8c42;font-size:18px">—</div></div>
     </div>
   </div>
+  <div id="capsuleSection"></div>
 </div>
 
 <!-- PRESUPUESTO -->
@@ -182,20 +198,71 @@
 </div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────────────────
+// ── Config ─────────────────────────────────────────────────────────────────────
 const STORAGE_KEY = "tsum_tracker_v1";
-const MONTH_CONFIG = {
-  name: "Mayo 2026",
-  endDate: "2026-05-31",
-  capsules: 2, premiumTicketsPerCapsule: 6, capsuleCost: 450000,
-  selectBoxes: 4, selectBoxBudget: 360000,
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznMEKIiCMjSSCPkC0LgRw9tgZc42zull48elcHcxR2QZk1iTVy8OiJxpwSV_GnDdSV/exec";
+
+const MONTHS = {
+  "2026-05": {
+    name: "Mayo 2026",
+    endDate: "2026-05-31",
+    capsules: 2, premiumTicketsPerCapsule: 6, capsuleCost: 450000,
+    selectBoxes: 4, selectBoxBudget: 360000,
+    chars: [
+      { id:"poe",   name:"Poe Dameron",           skillCurrent:5, skillMax:6, skillPct:31, upgrades:[1,1,2,4,8,16] },
+      { id:"rey",   name:"Rey & BB-8",             skillCurrent:5, skillMax:6, skillPct:5,  upgrades:[1,1,2,4,8,20] },
+      { id:"snoke", name:"Snoke",                  skillCurrent:4, skillMax:6, skillPct:87, upgrades:[1,1,2,4,8,16] },
+      { id:"epg",   name:"Elite Praetorian Guard", skillCurrent:4, skillMax:6, skillPct:42, upgrades:[1,1,2,4,8,16] },
+    ],
+    capsulesDef: [
+      { id:"cap_may_1", name:"Pick Up Capsule #1", total:15 },
+      { id:"cap_may_2", name:"Pick Up Capsule #2", total:15 },
+    ],
+  },
+  "2026-06": {
+    name: "Junio 2026",
+    endDate: "2026-06-30",
+    capsules: 2, premiumTicketsPerCapsule: 6, capsuleCost: 450000,
+    selectBoxes: 4, selectBoxBudget: 360000,
+    chars: [
+      { id:"mardonald", name:"Marine Donald & Mickey", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
+      { id:"mardonald_charm", name:"Marine Donald (Charm)", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,7,14] },
+      { id:"marstitch", name:"Marine Stitch",           skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,16] },
+    ],
+    capsulesDef: [
+      { id:"cap_jun_1", name:"Pick Up Capsule #1", total:15 },
+      { id:"cap_jun_2", name:"Pick Up Capsule #2", total:15 },
+    ],
+  },
 };
-const INITIAL_CHARS = [
-  { id:"poe",   name:"Poe Dameron",           skillCurrent:5, skillMax:6, skillPct:31, upgrades:[1,1,2,4,8,16] },
-  { id:"rey",   name:"Rey & BB-8",             skillCurrent:5, skillMax:6, skillPct:5,  upgrades:[1,1,2,4,8,20] },
-  { id:"snoke", name:"Snoke",                  skillCurrent:4, skillMax:6, skillPct:87, upgrades:[1,1,2,4,8,16] },
-  { id:"epg",   name:"Elite Praetorian Guard", skillCurrent:4, skillMax:6, skillPct:42, upgrades:[1,1,2,4,8,16] },
-];
+
+function currentMonthKey() {
+  const now = new Date();
+  const m = (now.getMonth()+1).toString().padStart(2,"0");
+  return `${now.getFullYear()}-${m}`;
+}
+function activeMonthKey() {
+  const k = currentMonthKey();
+  return MONTHS[k] ? k : "2026-05";
+}
+function getMonthConfig() { return MONTHS[activeMonthKey()]; }
+
+// Chars to show: active month always visible, previous month shown as archived if has progress
+function getCharGroups() {
+  const active = activeMonthKey();
+  const groups = [];
+  const keys = Object.keys(MONTHS).sort();
+  keys.forEach(k => {
+    const isActive = k === active;
+    const isFuture = k > active;
+    if (isFuture) return;
+    const chars = (state.chars || []).filter(c => MONTHS[k].chars.find(d => d.id === c.id));
+    if (!isActive && chars.length === 0) return;
+    groups.push({ key: k, label: MONTHS[k].name, isActive, chars });
+  });
+  return groups;
+}
+
 const INITIAL_LOG = [
   { ts: new Date("2026-05-22T14:00:00").getTime(), coins:75111,  note:"Inicio" },
   { ts: new Date("2026-05-23T20:00:00").getTime(), coins:127000, note:"" },
@@ -204,31 +271,37 @@ const INITIAL_LOG = [
   { ts: new Date("2026-05-24T22:00:00").getTime(), coins:468000, note:"" },
 ];
 
+function buildInitialChars() {
+  const all = [];
+  Object.values(MONTHS).forEach(m => m.chars.forEach(c => all.push(JSON.parse(JSON.stringify(c)))));
+  return all;
+}
+function buildInitialCapsules() {
+  const caps = {};
+  Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => { caps[c.id] = 0; }));
+  return caps;
+}
+
 let state = {
   coins: 468000,
-  chars: JSON.parse(JSON.stringify(INITIAL_CHARS)),
+  chars: buildInitialChars(),
   log: JSON.parse(JSON.stringify(INITIAL_LOG)),
   premiumTickets: 0,
   selectBoxesOpened: 0,
   selectBoxCoinsSpent: 0,
+  capsules: buildInitialCapsules(),
 };
 
 // ── Persist ────────────────────────────────────────────────────────────────────
 function migrateOldDate(dateStr) {
   if (!dateStr) return Date.now();
-  // Full JS date string: "Thu Mar 26 2026 14:16:00 GMT-0600 (hora estándar central)"
   const full = new Date(dateStr);
   if (!isNaN(full.getTime())) return full.getTime();
-  // Short Spanish format: "lun 25 11:59 p.m." or "sáb 24 AM" or "vie 23" or "jue 22"
-  const spDays = { dom:0, lun:1, mar:2, "mié":3, mie:3, jue:4, vie:5, "sáb":6, sab:6 };
   const lower = dateStr.toLowerCase().trim();
-  // Extract day number
   const dayMatch = lower.match(/\b(\d{1,2})\b/);
   const dayNum = dayMatch ? parseInt(dayMatch[1]) : null;
   if (dayNum) {
-    // Build a May 2026 date
-    const d = new Date(2026, 4, dayNum); // month 4 = May
-    // Try to extract hour/minute
+    const d = new Date(2026, 4, dayNum);
     const timeMatch = lower.match(/(\d{1,2}):(\d{2})/);
     if (timeMatch) {
       let h = parseInt(timeMatch[1]);
@@ -236,10 +309,6 @@ function migrateOldDate(dateStr) {
       if (lower.includes("p.m.") && h < 12) h += 12;
       if (lower.includes("a.m.") && h === 12) h = 0;
       d.setHours(h, m, 0, 0);
-    } else if (lower.includes("pm") || lower.includes("p.m.")) {
-      d.setHours(21, 0, 0, 0);
-    } else if (lower.includes("am") || lower.includes("a.m.")) {
-      d.setHours(9, 0, 0, 0);
     } else {
       d.setHours(12, 0, 0, 0);
     }
@@ -256,13 +325,24 @@ function loadState() {
       if (parsed.log) {
         parsed.log = parsed.log.map(e => {
           if (e.ts) return e;
-          const dateStr = e.date || "";
-          const note = e.note || "";
-          return { ts: migrateOldDate(dateStr), coins: e.coins, note };
+          return { ts: migrateOldDate(e.date || ""), coins: e.coins, note: e.note || "" };
         });
-        // Sort by timestamp after migration
         parsed.log.sort((a, b) => a.ts - b.ts);
       }
+      // Ensure all chars exist (add new month chars if missing)
+      const allDefs = [];
+      Object.values(MONTHS).forEach(m => m.chars.forEach(c => allDefs.push(c)));
+      if (!parsed.chars) parsed.chars = [];
+      allDefs.forEach(def => {
+        if (!parsed.chars.find(c => c.id === def.id)) {
+          parsed.chars.push(JSON.parse(JSON.stringify(def)));
+        }
+      });
+      // Ensure capsules exist
+      if (!parsed.capsules) parsed.capsules = buildInitialCapsules();
+      Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
+        if (parsed.capsules[c.id] === undefined) parsed.capsules[c.id] = 0;
+      }));
       state = parsed;
     }
   } catch(e) {}
@@ -283,6 +363,7 @@ function dayKey(ts) {
   const d = new Date(ts);
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
+function todayKey() { return dayKey(Date.now()); }
 
 // ── Calc ───────────────────────────────────────────────────────────────────────
 function dupsRemaining(char) {
@@ -293,15 +374,19 @@ function dupsRemaining(char) {
   for (let i = char.skillCurrent + 1; i < char.skillMax; i++) total += char.upgrades[i];
   return total;
 }
+function activeChars() {
+  const cfg = getMonthConfig();
+  return state.chars.filter(c => cfg.chars.find(d => d.id === c.id));
+}
 function totalCoinsNeeded() {
-  return state.chars.reduce((s,c) => s + dupsRemaining(c) * 30000, 0);
+  return activeChars().reduce((s,c) => s + dupsRemaining(c) * 30000, 0);
 }
 function daysLeft() {
-  return Math.max(0, Math.ceil((new Date(MONTH_CONFIG.endDate + "T23:59:59") - new Date()) / 86400000));
+  const cfg = getMonthConfig();
+  return Math.max(0, Math.ceil((new Date(cfg.endDate + "T23:59:59") - new Date()) / 86400000));
 }
 function avgDaily() {
   if (state.log.length < 2) return 0;
-  // Group by calendar day, take first and last entry per day
   const byDay = {};
   state.log.forEach(e => {
     const k = dayKey(e.ts);
@@ -310,7 +395,6 @@ function avgDaily() {
   });
   const dayKeys = Object.keys(byDay).sort();
   if (dayKeys.length < 2) return 0;
-  // Net gain per day (only positive days count)
   const gains = [];
   for (let i = 1; i < dayKeys.length; i++) {
     const prev = byDay[dayKeys[i-1]].last;
@@ -320,6 +404,26 @@ function avgDaily() {
   }
   if (gains.length === 0) return 0;
   return Math.round(gains.reduce((a,b) => a+b, 0) / gains.length);
+}
+function coinsGainedToday() {
+  const tk = todayKey();
+  const todayLogs = state.log.filter(e => dayKey(e.ts) === tk);
+  if (todayLogs.length < 2) return 0;
+  let gained = 0;
+  for (let i = 1; i < todayLogs.length; i++) {
+    const delta = todayLogs[i].coins - todayLogs[i-1].coins;
+    if (delta > 0) gained += delta;
+  }
+  return gained;
+}
+function totalCoinsGainedMonth() {
+  if (state.log.length < 2) return 0;
+  let total = 0;
+  for (let i = 1; i < state.log.length; i++) {
+    const delta = state.log[i].coins - state.log[i-1].coins;
+    if (delta > 0) total += delta;
+  }
+  return total;
 }
 function fmt(n) { return n > 999999 ? (n/1000000).toFixed(1)+"M" : n.toLocaleString("es-MX"); }
 
@@ -369,45 +473,39 @@ function updateCharPct(id, val) {
   c.skillPct = Math.min(99, pct);
   saveLocal(); render();
 }
+function changeCapsule(id, d) {
+  const cap = Object.values(MONTHS).flatMap(m => m.capsulesDef).find(c => c.id === id);
+  if (!cap) return;
+  state.capsules[id] = Math.max(0, Math.min(cap.total, (state.capsules[id] || 0) + d));
+  saveLocal(); render();
+}
 
 // ── Sync ───────────────────────────────────────────────────────────────────────
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznMEKIiCMjSSCPkC0LgRw9tgZc42zull48elcHcxR2QZk1iTVy8OiJxpwSV_GnDdSV/exec";
-
 function setSyncMsg(text, color) {
   const el = document.getElementById("saveMsg");
   el.style.color = color;
   el.textContent = text;
   if (text) setTimeout(() => { if (el.textContent === text) el.textContent = ""; }, 3000);
 }
-
 function setSyncBtns(disabled) {
   document.getElementById("syncUpBtn").disabled = disabled;
   document.getElementById("syncDownBtn").disabled = disabled;
 }
-
 async function sync() {
   setSyncBtns(true);
   setSyncMsg("⏳ Subiendo...", "#aaa");
   try {
-    const writeRes = await fetch(APPS_SCRIPT_URL, {
+    const res = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify({ action: "write", data: state }),
     });
-    const writeJson = await writeRes.json();
-    if (writeJson.ok) {
-      saveLocal();
-      setSyncMsg("☁️ Guardado en Sheets", "#7fff7f");
-    } else {
-      setSyncMsg("✗ Error: " + writeJson.error, "#ff6b6b");
-    }
-  } catch(e) {
-    setSyncMsg("✗ " + e.message, "#ff6b6b");
-  } finally {
-    setSyncBtns(false);
-  }
+    const json = await res.json();
+    if (json.ok) { saveLocal(); setSyncMsg("☁️ Guardado en Sheets", "#7fff7f"); }
+    else setSyncMsg("✗ Error: " + json.error, "#ff6b6b");
+  } catch(e) { setSyncMsg("✗ " + e.message, "#ff6b6b"); }
+  finally { setSyncBtns(false); }
 }
-
 async function syncDown() {
   setSyncBtns(true);
   setSyncMsg("⏳ Bajando...", "#aaa");
@@ -416,21 +514,26 @@ async function syncDown() {
     const json = await res.json();
     if (json.ok && json.data) {
       state = json.data;
-      saveLocal();
-      render();
+      // Ensure new fields exist after pulling old state
+      if (!state.capsules) state.capsules = buildInitialCapsules();
+      Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
+        if (state.capsules[c.id] === undefined) state.capsules[c.id] = 0;
+      }));
+      // Ensure June chars exist
+      Object.values(MONTHS).forEach(m => m.chars.forEach(def => {
+        if (!state.chars.find(c => c.id === def.id))
+          state.chars.push(JSON.parse(JSON.stringify(def)));
+      }));
+      saveLocal(); render();
       setSyncMsg("⬇️ Datos bajados de Sheets", "#7fbfff");
-    } else {
-      setSyncMsg("✗ Sin datos en Sheets", "#ff6b6b");
-    }
-  } catch(e) {
-    setSyncMsg("✗ " + e.message, "#ff6b6b");
-  } finally {
-    setSyncBtns(false);
-  }
+    } else setSyncMsg("✗ Sin datos en Sheets", "#ff6b6b");
+  } catch(e) { setSyncMsg("✗ " + e.message, "#ff6b6b"); }
+  finally { setSyncBtns(false); }
 }
 
 // ── Render ─────────────────────────────────────────────────────────────────────
 function render() {
+  const cfg = getMonthConfig();
   const days = daysLeft();
   const coinsReq = totalCoinsNeeded();
   const falta = Math.max(0, coinsReq - state.coins);
@@ -438,6 +541,8 @@ function render() {
   const proj = state.coins + avg * days;
   const onTrack = proj >= coinsReq;
   const uniqueDays = new Set(state.log.map(e => dayKey(e.ts))).size;
+  const hoy = coinsGainedToday();
+  const mes = totalCoinsGainedMonth();
 
   document.getElementById("daysLeft").textContent = days;
   document.getElementById("coinInput").value = state.coins.toLocaleString("es-MX");
@@ -450,61 +555,103 @@ function render() {
   document.getElementById("statProyect").textContent = fmt(proj);
   document.getElementById("statProyect").style.color = onTrack ? "#7fff7f" : "#ff8c42";
   document.getElementById("statProyectSub").textContent = days + " días";
+  document.getElementById("statHoy").textContent = hoy > 0 ? fmt(hoy) : "—";
+  document.getElementById("statMes").textContent = mes > 0 ? fmt(mes) : "—";
   document.getElementById("trackBox").className = "track-box " + (onTrack ? "good" : "bad");
   document.getElementById("trackIcon").textContent = onTrack ? "🟢" : "🔴";
   document.getElementById("trackTitle").textContent = onTrack ? "¡En camino!" : "Por debajo del objetivo";
   document.getElementById("trackTitle").style.color = onTrack ? "#7fff7f" : "#ff6b6b";
   const diff = proj - coinsReq;
-  document.getElementById("trackSub").textContent = "Necesitas " + coinsReq.toLocaleString("es-MX") + " · Proyectado " + fmt(proj) + " (" + (diff >= 0 ? "+" : "") + diff.toLocaleString("es-MX") + ")";
+  document.getElementById("trackSub").textContent =
+    `Necesitas ${coinsReq.toLocaleString("es-MX")} · Proyectado ${fmt(proj)} (avg×días + saldo)`;
   document.getElementById("ticketCount").textContent = state.premiumTickets;
   document.getElementById("ticketSub").textContent = "≈ " + (state.premiumTickets * 30000).toLocaleString("es-MX") + " monedas";
 
-  // Chars
+  // ── Avance: personajes por mes ─────────────────────────────────────────────
   const charContainer = document.getElementById("charCards");
   charContainer.innerHTML = "";
   let totalDups = 0;
-  state.chars.forEach(c => {
-    const dups = dupsRemaining(c);
-    totalDups += dups;
-    const isMax = c.skillCurrent >= c.skillMax;
-    const div = document.createElement("div");
-    div.className = "char-card " + (isMax ? "maxed" : "normal");
-    div.style.marginBottom = "12px";
+  const groups = getCharGroups();
 
-    let barHTML = '<div class="skill-bar">';
-    for (let i = 0; i < c.skillMax; i++) {
-      if (i < c.skillCurrent - 1) {
-        barHTML += '<div class="skill-pip filled"></div>';
-      } else if (i === c.skillCurrent - 1) {
-        barHTML += `<div class="skill-pip"><div class="skill-pip-inner" style="width:${c.skillPct}%"></div></div>`;
-      } else {
-        barHTML += '<div class="skill-pip"></div>';
+  groups.forEach(group => {
+    const sectionTitle = document.createElement("div");
+    sectionTitle.className = "month-section-title" + (group.isActive ? "" : " archived");
+    sectionTitle.textContent = group.isActive ? `▸ ${group.label}` : `▾ ${group.label} (archivado)`;
+    charContainer.appendChild(sectionTitle);
+
+    group.chars.forEach(c => {
+      const dups = dupsRemaining(c);
+      if (group.isActive) totalDups += dups;
+      const isMax = c.skillCurrent >= c.skillMax;
+      const isArchived = !group.isActive;
+      const div = document.createElement("div");
+      div.className = "char-card " + (isArchived ? "archived" : isMax ? "maxed" : "normal");
+
+      let barHTML = '<div class="skill-bar">';
+      for (let i = 0; i < c.skillMax; i++) {
+        if (i < c.skillCurrent - 1) barHTML += '<div class="skill-pip filled"></div>';
+        else if (i === c.skillCurrent - 1) barHTML += `<div class="skill-pip"><div class="skill-pip-inner" style="width:${c.skillPct}%"></div></div>`;
+        else barHTML += '<div class="skill-pip"></div>';
       }
-    }
-    barHTML += `<span class="skill-level-text">${c.skillCurrent}/${c.skillMax}</span></div>`;
+      barHTML += `<span class="skill-level-text">${c.skillCurrent}/${c.skillMax}</span></div>`;
 
-    div.innerHTML = `
-      ${isMax ? '<div class="char-max-badge">MAX ✓</div>' : ''}
-      <div class="char-name">${c.name}</div>
-      ${barHTML}
-      <div class="char-stats">
-        <div class="char-stat"><div class="char-stat-label">Dups restantes</div><div class="char-stat-value" style="color:${isMax?"#7fff7f":"#f5c518"}">${dups}</div></div>
-        <div class="char-stat"><div class="char-stat-label">Monedas</div><div class="char-stat-value" style="color:${isMax?"#7fff7f":"#ff8c42"};font-size:14px">${(dups*30000).toLocaleString("es-MX")}</div></div>
-      </div>
-      ${!isMax ? `<div class="char-controls">
-        <label>Barra %:</label>
-        <input type="text" inputmode="numeric" class="char-pct-input" value="${c.skillPct}" onchange="updateCharPct('${c.id}',this.value)" placeholder="0–99">
-      </div>` : ''}
-    `;
-    charContainer.appendChild(div);
+      div.innerHTML = `
+        ${isMax ? '<div class="char-max-badge">MAX ✓</div>' : ''}
+        ${isArchived ? '<div class="char-archived-badge">Archivado</div>' : ''}
+        <div class="char-name">${c.name}</div>
+        ${barHTML}
+        <div class="char-stats">
+          <div class="char-stat"><div class="char-stat-label">Dups restantes</div><div class="char-stat-value" style="color:${isMax?"#7fff7f":"#f5c518"}">${dups}</div></div>
+          <div class="char-stat"><div class="char-stat-label">Monedas</div><div class="char-stat-value" style="color:${isMax?"#7fff7f":"#ff8c42"};font-size:14px">${(dups*30000).toLocaleString("es-MX")}</div></div>
+        </div>
+        ${(!isMax && !isArchived) ? `<div class="char-controls">
+          <label>Barra %:</label>
+          <input type="text" inputmode="numeric" class="char-pct-input" value="${c.skillPct}" onchange="updateCharPct('${c.id}',this.value)" placeholder="0–99">
+        </div>` : ''}
+      `;
+      charContainer.appendChild(div);
+    });
   });
-  document.getElementById("totalDups").textContent = totalDups;
-  document.getElementById("totalCoins").textContent = coinsReq.toLocaleString("es-MX");
 
-  // Presupuesto
-  const capsuleBudget = MONTH_CONFIG.capsules * MONTH_CONFIG.capsuleCost;
-  const ticketsValue = MONTH_CONFIG.capsules * MONTH_CONFIG.premiumTicketsPerCapsule * 30000;
-  const selectBoxTotal = MONTH_CONFIG.selectBoxes * MONTH_CONFIG.selectBoxBudget;
+  document.getElementById("totalDups").textContent = totalDups;
+  document.getElementById("totalCoins").textContent = (totalDups * 30000).toLocaleString("es-MX");
+
+  // ── Cápsulas ───────────────────────────────────────────────────────────────
+  const capSection = document.getElementById("capsuleSection");
+  capSection.innerHTML = "";
+  const activeCaps = getMonthConfig().capsulesDef;
+  if (activeCaps.length > 0) {
+    const title = document.createElement("div");
+    title.className = "month-section-title";
+    title.textContent = "▸ Pick Up Capsules";
+    title.style.marginTop = "12px";
+    capSection.appendChild(title);
+    activeCaps.forEach(cap => {
+      const opened = state.capsules[cap.id] || 0;
+      const complete = opened >= cap.total;
+      const pct = Math.round((opened / cap.total) * 100);
+      const div = document.createElement("div");
+      div.className = "capsule-card" + (complete ? " complete" : "");
+      div.innerHTML = `
+        <div class="capsule-title">${cap.name}</div>
+        <div class="capsule-progress">
+          <div class="capsule-bar-wrap"><div class="capsule-bar-fill" style="width:${pct}%"></div></div>
+          <div class="capsule-count">${opened}/${cap.total}</div>
+        </div>
+        <div class="capsule-btns">
+          <button class="cap-btn" onclick="changeCapsule('${cap.id}',-1)">−</button>
+          <button class="cap-btn" onclick="changeCapsule('${cap.id}',1)">+</button>
+        </div>
+        ${complete ? '<div class="capsule-reward">🎫 Skill Ticket obtenido</div>' : ''}
+      `;
+      capSection.appendChild(div);
+    });
+  }
+
+  // ── Presupuesto ────────────────────────────────────────────────────────────
+  const capsuleBudget = cfg.capsules * cfg.capsuleCost;
+  const ticketsValue = cfg.capsules * cfg.premiumTicketsPerCapsule * 30000;
+  const selectBoxTotal = cfg.selectBoxes * cfg.selectBoxBudget;
   const grandTotal = coinsReq + capsuleBudget + selectBoxTotal - ticketsValue;
   document.getElementById("bSkill").textContent = coinsReq.toLocaleString("es-MX");
   document.getElementById("bSkillNote").textContent = totalDups + " dups × 30,000";
@@ -512,7 +659,7 @@ function render() {
   document.getElementById("boxCount").textContent = state.selectBoxesOpened;
   document.getElementById("boxStats").innerHTML = `Gasto: <span style="color:#ff8c42;font-weight:700">${state.selectBoxCoinsSpent.toLocaleString("es-MX")}</span> · Prom/caja: <span style="color:#ff8c42;font-weight:700">${state.selectBoxesOpened > 0 ? Math.round(state.selectBoxCoinsSpent/state.selectBoxesOpened).toLocaleString("es-MX") : "—"}</span>`;
 
-  // Historial
+  // ── Historial ──────────────────────────────────────────────────────────────
   const histList = document.getElementById("histList");
   histList.innerHTML = "";
   document.getElementById("histCount").textContent = state.log.length + " registros";
