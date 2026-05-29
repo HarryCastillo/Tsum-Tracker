@@ -387,23 +387,17 @@ function daysLeft() {
 }
 function avgDaily() {
   if (state.log.length < 2) return 0;
+  // Sum positive deltas per calendar day
   const byDay = {};
-  state.log.forEach(e => {
+  for (let i = 1; i < state.log.length; i++) {
+    const e = state.log[i];
     const k = dayKey(e.ts);
-    if (!byDay[k]) byDay[k] = { first: e.coins, last: e.coins };
-    byDay[k].last = e.coins;
-  });
-  const dayKeys = Object.keys(byDay).sort();
-  if (dayKeys.length < 2) return 0;
-  const gains = [];
-  for (let i = 1; i < dayKeys.length; i++) {
-    const prev = byDay[dayKeys[i-1]].last;
-    const curr = byDay[dayKeys[i]].last;
-    const delta = curr - prev;
-    if (delta > 0) gains.push(delta);
+    const delta = e.coins - state.log[i-1].coins;
+    if (delta > 0) byDay[k] = (byDay[k] || 0) + delta;
   }
-  if (gains.length === 0) return 0;
-  return Math.round(gains.reduce((a,b) => a+b, 0) / gains.length);
+  const dayKeys = Object.keys(byDay);
+  if (dayKeys.length === 0) return 0;
+  return Math.round(dayKeys.reduce((s,k) => s + byDay[k], 0) / dayKeys.length);
 }
 function coinsGainedToday() {
   const tk = todayKey();
@@ -443,11 +437,13 @@ function formatCoinInput(el) {
   if (!isNaN(num)) el.value = num.toLocaleString("es-MX");
 }
 function getCoinInputValue() {
-  return parseInt(document.getElementById("coinInput").value.replace(/,/g, "")) || 0;
+  const raw = document.getElementById("coinInput").value.replace(/,/g, "").trim();
+  if (raw === "") return null;
+  return parseInt(raw);
 }
 function applyAndLog() {
   const v = getCoinInputValue();
-  if (!v) return;
+  if (v === null || isNaN(v)) return;
   state.coins = v;
   const note = document.getElementById("logNote").value.trim();
   state.log.push({ ts: Date.now(), coins: v, note });
