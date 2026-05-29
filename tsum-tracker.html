@@ -585,7 +585,8 @@ function render() {
 
       let barHTML = '<div class="skill-bar">';
       for (let i = 0; i < c.skillMax; i++) {
-        if (i < c.skillCurrent - 1) barHTML += '<div class="skill-pip filled"></div>';
+        if (isMax) barHTML += '<div class="skill-pip filled"></div>';
+        else if (i < c.skillCurrent - 1) barHTML += '<div class="skill-pip filled"></div>';
         else if (i === c.skillCurrent - 1) barHTML += `<div class="skill-pip"><div class="skill-pip-inner" style="width:${c.skillPct}%"></div></div>`;
         else barHTML += '<div class="skill-pip"></div>';
       }
@@ -680,9 +681,4 @@ function render() {
   });
 }
 
-// ── Init ───────────────────────────────────────────────────────────────────────
-loadState();
-render();
-</script>
-</body>
-</html>
+// ── Init ──────────────────────────────────────────────
