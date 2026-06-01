@@ -334,6 +334,13 @@ function loadState() {
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
         if (parsed.capsules[c.id] === undefined) parsed.capsules[c.id] = 0;
       }));
+      // Migrar nombres viejos → nuevos
+      const nameMap = {
+        "Marine Donald & Mickey": "Beach Donald & Mickey",
+        "Marine Donald (Charm)": "Beach Donald (Charm)",
+        "Marine Stitch": "Beach Stitch",
+      };
+      if (parsed.chars) parsed.chars.forEach(c => { if (nameMap[c.name]) c.name = nameMap[c.name]; });
       state = parsed;
     }
   } catch(e) {}
