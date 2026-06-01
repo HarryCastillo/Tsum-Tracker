@@ -402,10 +402,16 @@ function avgDaily() {
 function coinsGainedToday() {
   const tk = todayKey();
   const todayLogs = state.log.filter(e => dayKey(e.ts) === tk);
-  if (todayLogs.length < 2) return 0;
+  if (todayLogs.length === 0) return 0;
+  // Base: último registro anterior a hoy (o primer registro de hoy si no hay previo)
+  const prevLogs = state.log.filter(e => dayKey(e.ts) < tk);
+  const base = prevLogs.length > 0 ? prevLogs[prevLogs.length - 1].coins : todayLogs[0].coins;
+  // Sumar deltas positivos: comparar cada registro de hoy contra el anterior (prev o registro anterior del día)
   let gained = 0;
-  for (let i = 1; i < todayLogs.length; i++) {
-    const delta = todayLogs[i].coins - todayLogs[i-1].coins;
+  const allRef = [...prevLogs, ...todayLogs];
+  const startIdx = prevLogs.length; // índice donde empiezan los de hoy en allRef
+  for (let i = startIdx; i < allRef.length; i++) {
+    const delta = allRef[i].coins - allRef[i-1].coins;
     if (delta > 0) gained += delta;
   }
   return gained;
