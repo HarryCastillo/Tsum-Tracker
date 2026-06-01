@@ -225,9 +225,9 @@ const MONTHS = {
     capsules: 2, premiumTicketsPerCapsule: 6, capsuleCost: 450000,
     selectBoxes: 4, selectBoxBudget: 360000,
     chars: [
-      { id:"mardonald", name:"Marine Donald & Mickey", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
-      { id:"mardonald_charm", name:"Marine Donald (Charm)", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,7,14] },
-      { id:"marstitch", name:"Marine Stitch",           skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,16] },
+      { id:"mardonald", name:"Beach Donald & Mickey", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
+      { id:"mardonald_charm", name:"Beach Donald (Charm)", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,7,14] },
+      { id:"marstitch", name:"Beach Stitch",           skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,16] },
     ],
     capsulesDef: [
       { id:"cap_jun_1", name:"Pick Up Capsule #1", total:15 },
@@ -247,20 +247,11 @@ function activeMonthKey() {
 }
 function getMonthConfig() { return MONTHS[activeMonthKey()]; }
 
-// Chars to show: active month always visible, previous month shown as archived if has progress
+// Chars to show: solo mes activo en UI (meses anteriores ocultos pero siguen en state)
 function getCharGroups() {
   const active = activeMonthKey();
-  const groups = [];
-  const keys = Object.keys(MONTHS).sort();
-  keys.forEach(k => {
-    const isActive = k === active;
-    const isFuture = k > active;
-    if (isFuture) return;
-    const chars = (state.chars || []).filter(c => MONTHS[k].chars.find(d => d.id === c.id));
-    if (!isActive && chars.length === 0) return;
-    groups.push({ key: k, label: MONTHS[k].name, isActive, chars });
-  });
-  return groups;
+  const chars = (state.chars || []).filter(c => MONTHS[active].chars.find(d => d.id === c.id));
+  return [{ key: active, label: MONTHS[active].name, isActive: true, chars }];
 }
 
 const INITIAL_LOG = [
@@ -402,16 +393,10 @@ function avgDaily() {
 function coinsGainedToday() {
   const tk = todayKey();
   const todayLogs = state.log.filter(e => dayKey(e.ts) === tk);
-  if (todayLogs.length === 0) return 0;
-  // Base: último registro anterior a hoy (o primer registro de hoy si no hay previo)
-  const prevLogs = state.log.filter(e => dayKey(e.ts) < tk);
-  const base = prevLogs.length > 0 ? prevLogs[prevLogs.length - 1].coins : todayLogs[0].coins;
-  // Sumar deltas positivos: comparar cada registro de hoy contra el anterior (prev o registro anterior del día)
+  if (todayLogs.length < 2) return 0;
   let gained = 0;
-  const allRef = [...prevLogs, ...todayLogs];
-  const startIdx = prevLogs.length; // índice donde empiezan los de hoy en allRef
-  for (let i = startIdx; i < allRef.length; i++) {
-    const delta = allRef[i].coins - allRef[i-1].coins;
+  for (let i = 1; i < todayLogs.length; i++) {
+    const delta = todayLogs[i].coins - todayLogs[i-1].coins;
     if (delta > 0) gained += delta;
   }
   return gained;
