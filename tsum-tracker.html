@@ -8,9 +8,8 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0a1628; color: #e8f4ff; font-family: 'Segoe UI', sans-serif; padding-bottom: 40px; }
   .header { background: linear-gradient(135deg,#0d2a5e,#1a4a8a); padding: 16px; border-bottom: 2px solid #2a6abf; display: flex; justify-content: space-between; align-items: flex-start; }
-  .header-left .label { font-size: 10px; color: #4dd0e1; letter-spacing: 2px; text-transform: uppercase; }
-  .header-left .month { font-size: 20px; font-weight: 800; margin-top: 2px; color: #fff; }
-  .header-left .days { font-size: 11px; color: #90b8d8; margin-top: 2px; }
+  .header-left .label { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: 1px; }
+  .header-left .days { font-size: 11px; color: #90b8d8; margin-top: 4px; }
   .header-left .days span { color: #f5c518; font-weight: 700; }
   .sync-row { display: flex; gap: 6px; }
   .sync-up { background: linear-gradient(135deg,#1a5c2a,#0f3a1a); color: #4dff91; border: 1px solid #2d8a4a; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; font-size: 12px; }
@@ -105,7 +104,6 @@
 <div class="header">
   <div class="header-left">
     <div class="label">Tsum Tsum Tracker</div>
-    <div class="month" id="monthName">Mayo 2026</div>
     <div class="days">Termina en <span id="daysLeft">—</span> días</div>
   </div>
   <div>
@@ -225,9 +223,9 @@ const MONTHS = {
     capsules: 2, premiumTicketsPerCapsule: 6, capsuleCost: 450000,
     selectBoxes: 4, selectBoxBudget: 360000,
     chars: [
-      { id:"mardonald", name:"Beach Donald & Mickey", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
-      { id:"mardonald_charm", name:"Beach Donald (Charm)", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,7,14] },
-      { id:"marstitch", name:"Beach Stitch",           skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,16] },
+      { id:"mardonald", name:"Marine Donald & Mickey", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
+      { id:"mardonald_charm", name:"Marine Donald (Charm)", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,7,14] },
+      { id:"marstitch", name:"Marine Stitch",           skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,16] },
     ],
     capsulesDef: [
       { id:"cap_jun_1", name:"Pick Up Capsule #1", total:15 },
@@ -247,11 +245,20 @@ function activeMonthKey() {
 }
 function getMonthConfig() { return MONTHS[activeMonthKey()]; }
 
-// Chars to show: solo mes activo en UI (meses anteriores ocultos pero siguen en state)
+// Chars to show: active month always visible, previous month shown as archived if has progress
 function getCharGroups() {
   const active = activeMonthKey();
-  const chars = (state.chars || []).filter(c => MONTHS[active].chars.find(d => d.id === c.id));
-  return [{ key: active, label: MONTHS[active].name, isActive: true, chars }];
+  const groups = [];
+  const keys = Object.keys(MONTHS).sort();
+  keys.forEach(k => {
+    const isActive = k === active;
+    const isFuture = k > active;
+    if (isFuture) return;
+    const chars = (state.chars || []).filter(c => MONTHS[k].chars.find(d => d.id === c.id));
+    if (!isActive && chars.length === 0) return;
+    groups.push({ key: k, label: MONTHS[k].name, isActive, chars });
+  });
+  return groups;
 }
 
 const INITIAL_LOG = [
@@ -334,13 +341,6 @@ function loadState() {
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
         if (parsed.capsules[c.id] === undefined) parsed.capsules[c.id] = 0;
       }));
-      // Migrar nombres viejos → nuevos
-      const nameMap = {
-        "Marine Donald & Mickey": "Beach Donald & Mickey",
-        "Marine Donald (Charm)": "Beach Donald (Charm)",
-        "Marine Stitch": "Beach Stitch",
-      };
-      if (parsed.chars) parsed.chars.forEach(c => { if (nameMap[c.name]) c.name = nameMap[c.name]; });
       state = parsed;
     }
   } catch(e) {}
