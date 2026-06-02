@@ -8,8 +8,9 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0a1628; color: #e8f4ff; font-family: 'Segoe UI', sans-serif; padding-bottom: 40px; }
   .header { background: linear-gradient(135deg,#0d2a5e,#1a4a8a); padding: 16px; border-bottom: 2px solid #2a6abf; display: flex; justify-content: space-between; align-items: flex-start; }
-  .header-left .label { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: 1px; }
-  .header-left .days { font-size: 11px; color: #90b8d8; margin-top: 4px; }
+  .header-left .label { font-size: 10px; color: #4dd0e1; letter-spacing: 2px; text-transform: uppercase; }
+  .header-left .month { font-size: 20px; font-weight: 800; margin-top: 2px; color: #fff; }
+  .header-left .days { font-size: 11px; color: #90b8d8; margin-top: 2px; }
   .header-left .days span { color: #f5c518; font-weight: 700; }
   .sync-row { display: flex; gap: 6px; }
   .sync-up { background: linear-gradient(135deg,#1a5c2a,#0f3a1a); color: #4dff91; border: 1px solid #2d8a4a; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; font-size: 12px; }
@@ -104,6 +105,7 @@
 <div class="header">
   <div class="header-left">
     <div class="label">Tsum Tsum Tracker</div>
+    <div class="month" id="monthName">Mayo 2026</div>
     <div class="days">Termina en <span id="daysLeft">—</span> días</div>
   </div>
   <div>
@@ -383,9 +385,17 @@ function daysLeft() {
   const cfg = getMonthConfig();
   return Math.max(0, Math.ceil((new Date(cfg.endDate + "T23:59:59") - new Date()) / 86400000));
 }
+function currentMonthLogs() {
+  const mk = activeMonthKey(); // e.g. "2026-06"
+  const [y, m] = mk.split("-").map(Number);
+  return state.log.filter(e => {
+    const d = new Date(e.ts);
+    return d.getFullYear() === y && (d.getMonth() + 1) === m;
+  });
+}
 function avgDaily() {
   if (state.log.length < 2) return 0;
-  // Sum positive deltas per calendar day
+  // Sum positive deltas per calendar day (histórico completo)
   const byDay = {};
   for (let i = 1; i < state.log.length; i++) {
     const e = state.log[i];
@@ -409,10 +419,11 @@ function coinsGainedToday() {
   return gained;
 }
 function totalCoinsGainedMonth() {
-  if (state.log.length < 2) return 0;
+  const logs = currentMonthLogs();
+  if (logs.length < 2) return 0;
   let total = 0;
-  for (let i = 1; i < state.log.length; i++) {
-    const delta = state.log[i].coins - state.log[i-1].coins;
+  for (let i = 1; i < logs.length; i++) {
+    const delta = logs[i].coins - logs[i-1].coins;
     if (delta > 0) total += delta;
   }
   return total;
