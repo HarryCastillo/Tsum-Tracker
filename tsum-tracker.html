@@ -105,7 +105,6 @@
 <div class="header">
   <div class="header-left">
     <div class="label">Tsum Tsum Tracker</div>
-    <div class="month" id="monthName">Mayo 2026</div>
     <div class="days">Termina en <span id="daysLeft">—</span> días</div>
   </div>
   <div>
@@ -256,6 +255,7 @@ function getCharGroups() {
     const isActive = k === active;
     const isFuture = k > active;
     if (isFuture) return;
+    if (!isActive) return; // No mostrar meses anteriores
     const chars = (state.chars || []).filter(c => MONTHS[k].chars.find(d => d.id === c.id));
     if (!isActive && chars.length === 0) return;
     groups.push({ key: k, label: MONTHS[k].name, isActive, chars });
@@ -409,11 +409,17 @@ function avgDaily() {
 }
 function coinsGainedToday() {
   const tk = todayKey();
-  const todayLogs = state.log.filter(e => dayKey(e.ts) === tk);
-  if (todayLogs.length < 2) return 0;
+  const allSorted = [...state.log].sort((a,b) => a.ts - b.ts);
+  const todayLogs = allSorted.filter(e => dayKey(e.ts) === tk);
+  if (todayLogs.length === 0) return 0;
+  // Usar último registro de antes de hoy como baseline
+  const prevLogs = allSorted.filter(e => dayKey(e.ts) !== tk && e.ts < todayLogs[0].ts);
+  const baseline = prevLogs.length > 0 ? prevLogs[prevLogs.length - 1] : null;
+  const combined = baseline ? [baseline, ...todayLogs] : todayLogs;
+  if (combined.length < 2) return 0;
   let gained = 0;
-  for (let i = 1; i < todayLogs.length; i++) {
-    const delta = todayLogs[i].coins - todayLogs[i-1].coins;
+  for (let i = 1; i < combined.length; i++) {
+    const delta = combined[i].coins - combined[i-1].coins;
     if (delta > 0) gained += delta;
   }
   return gained;
