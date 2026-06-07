@@ -8,7 +8,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0a1628; color: #e8f4ff; font-family: 'Segoe UI', sans-serif; padding-bottom: 40px; }
   .header { background: linear-gradient(135deg,#0d2a5e,#1a4a8a); padding: 16px; border-bottom: 2px solid #2a6abf; display: flex; justify-content: space-between; align-items: flex-start; }
-  .header-left .label { font-size: 10px; color: #4dd0e1; letter-spacing: 2px; text-transform: uppercase; }
+  .header-left .label { font-size: 15px; color: #ffffff; letter-spacing: 2px; text-transform: uppercase; font-weight: 800; }
   .header-left .month { font-size: 20px; font-weight: 800; margin-top: 2px; color: #fff; }
   .header-left .days { font-size: 11px; color: #90b8d8; margin-top: 2px; }
   .header-left .days span { color: #f5c518; font-weight: 700; }
@@ -378,8 +378,18 @@ function activeChars() {
   const cfg = getMonthConfig();
   return state.chars.filter(c => cfg.chars.find(d => d.id === c.id));
 }
+function totalCapsuleCoinsNeeded() {
+  const cfg = getMonthConfig();
+  return cfg.capsulesDef.reduce((s, cap) => {
+    const opened = state.capsules[cap.id] || 0;
+    const remaining = Math.max(0, cap.total - opened);
+    if (remaining === 0) return s;
+    // Proportional cost: remaining pulls × (capsuleCost / total pulls)
+    return s + Math.round(remaining * (cfg.capsuleCost / cap.total));
+  }, 0);
+}
 function totalCoinsNeeded() {
-  return activeChars().reduce((s,c) => s + dupsRemaining(c) * 30000, 0);
+  return activeChars().reduce((s,c) => s + dupsRemaining(c) * 30000, 0) + totalCapsuleCoinsNeeded();
 }
 function daysLeft() {
   const cfg = getMonthConfig();
@@ -558,9 +568,13 @@ function render() {
   document.getElementById("daysLeft").textContent = days;
   document.getElementById("coinInput").value = state.coins.toLocaleString("es-MX");
   document.getElementById("coinsSub").textContent = state.coins.toLocaleString("es-MX") + " monedas";
+  const charsReq = activeChars().reduce((s,c) => s + dupsRemaining(c) * 30000, 0);
+  const capsReq = totalCapsuleCoinsNeeded();
   document.getElementById("statFaltan").textContent = fmt(falta);
   document.getElementById("statFaltan").style.color = falta === 0 ? "#7fff7f" : "#ff6b6b";
-  document.getElementById("statFaltanSub").textContent = Math.ceil(falta/30000) + " cajas";
+  document.getElementById("statFaltanSub").textContent = capsReq > 0
+    ? `${fmt(charsReq)} chars + ${fmt(capsReq)} caps`
+    : Math.ceil(falta/30000) + " cajas";
   document.getElementById("statProm").textContent = avg > 0 ? fmt(avg) : "—";
   document.getElementById("statPromSub").textContent = uniqueDays + " días";
   document.getElementById("statProyect").textContent = fmt(proj);
