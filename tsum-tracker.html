@@ -278,7 +278,7 @@ function buildInitialChars() {
 }
 function buildInitialCapsules() {
   const caps = {};
-  Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => { caps[c.id] = 0; }));
+  Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => { caps[c.id] = c.total; }));
   return caps;
 }
 
@@ -341,7 +341,7 @@ function loadState() {
       // Ensure capsules exist
       if (!parsed.capsules) parsed.capsules = buildInitialCapsules();
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
-        if (parsed.capsules[c.id] === undefined) parsed.capsules[c.id] = 0;
+        if (parsed.capsules[c.id] === undefined) parsed.capsules[c.id] = c.total;
       }));
       state = parsed;
     }
@@ -381,8 +381,7 @@ function activeChars() {
 function totalCapsuleCoinsNeeded() {
   const cfg = getMonthConfig();
   return cfg.capsulesDef.reduce((s, cap) => {
-    const opened = state.capsules[cap.id] || 0;
-    const remaining = Math.max(0, cap.total - opened);
+    const remaining = state.capsules[cap.id] ?? cap.total;
     if (remaining === 0) return s;
     // Proportional cost: remaining pulls × (capsuleCost / total pulls)
     return s + Math.round(remaining * (cfg.capsuleCost / cap.total));
@@ -497,7 +496,7 @@ function updateCharPct(id, val) {
 function changeCapsule(id, d) {
   const cap = Object.values(MONTHS).flatMap(m => m.capsulesDef).find(c => c.id === id);
   if (!cap) return;
-  state.capsules[id] = Math.max(0, Math.min(cap.total, (state.capsules[id] || 0) + d));
+  state.capsules[id] = Math.max(0, Math.min(cap.total, (state.capsules[id] ?? cap.total) + d));
   saveLocal(); render();
 }
 
@@ -538,7 +537,7 @@ async function syncDown() {
       // Ensure new fields exist after pulling old state
       if (!state.capsules) state.capsules = buildInitialCapsules();
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
-        if (state.capsules[c.id] === undefined) state.capsules[c.id] = 0;
+        if (state.capsules[c.id] === undefined) state.capsules[c.id] = c.total;
       }));
       // Ensure June chars exist
       Object.values(MONTHS).forEach(m => m.chars.forEach(def => {
@@ -653,22 +652,22 @@ function render() {
     title.style.marginTop = "12px";
     capSection.appendChild(title);
     activeCaps.forEach(cap => {
-      const opened = state.capsules[cap.id] || 0;
-      const complete = opened >= cap.total;
-      const pct = Math.round((opened / cap.total) * 100);
+      const remaining = state.capsules[cap.id] ?? cap.total;
+      const complete = remaining === 0;
+      const pct = Math.round((remaining / cap.total) * 100); // bar full = all pending, empty = done
       const div = document.createElement("div");
       div.className = "capsule-card" + (complete ? " complete" : "");
       div.innerHTML = `
         <div class="capsule-title">${cap.name}</div>
         <div class="capsule-progress">
           <div class="capsule-bar-wrap"><div class="capsule-bar-fill" style="width:${pct}%"></div></div>
-          <div class="capsule-count">${opened}/${cap.total}</div>
+          <div class="capsule-count">${remaining}/${cap.total}</div>
         </div>
         <div class="capsule-btns">
           <button class="cap-btn" onclick="changeCapsule('${cap.id}',-1)">−</button>
           <button class="cap-btn" onclick="changeCapsule('${cap.id}',1)">+</button>
         </div>
-        ${complete ? '<div class="capsule-reward">🎫 Skill Ticket obtenido</div>' : ''}
+        ${complete ? '<div class="capsule-reward">🎫 Skill Ticket obtenido</div>' : `<div style="font-size:11px;color:#4a7aaa;margin-top:6px">Faltan ${remaining} tsums por comprar</div>`}
       `;
       capSection.appendChild(div);
     });
