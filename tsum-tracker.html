@@ -345,20 +345,17 @@ function loadState() {
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
         if (parsed.capsules[c.id] === undefined) parsed.capsules[c.id] = c.total;
       }));
-      // Migration: convert from old "bought" semantics to new "remaining" semantics.
-      // Old: value = tsums bought (0 = none bought, cap.total = all bought = complete)
-      // New: value = tsums remaining (cap.total = none bought, 0 = all bought = complete)
-      // Detection: if any active capsule has a value that looks like "bought" (i.e. cap.total - value makes more sense),
-      // we check via a version flag. If no version flag present, assume old state and convert.
+      // Migration v3: force-reconvert capsule values to "remaining" semantics.
+      // Previous migrations may have left state in "bought" semantics due to version flag already set.
       const activeMk = activeMonthKey();
       const activeCapsuleDefs = MONTHS[activeMk]?.capsulesDef || [];
-      if (!parsed._capsulesVersion || parsed._capsulesVersion < 2) {
-        // Convert: remaining = cap.total - oldValue (which was bought count)
+      if (!parsed._capsulesVersion || parsed._capsulesVersion < 3) {
         activeCapsuleDefs.forEach(c => {
-          const oldVal = parsed.capsules[c.id] ?? 0;
-          parsed.capsules[c.id] = c.total - oldVal;
+          const val = parsed.capsules[c.id] ?? 0;
+          // Convert from bought → remaining
+          parsed.capsules[c.id] = c.total - val;
         });
-        parsed._capsulesVersion = 2;
+        parsed._capsulesVersion = 3;
       }
       state = parsed;
     }
@@ -556,15 +553,15 @@ async function syncDown() {
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
         if (state.capsules[c.id] === undefined) state.capsules[c.id] = c.total;
       }));
-      // Migration: convert from old "bought" semantics to new "remaining" semantics
+      // Migration v3: force-reconvert capsule values to "remaining" semantics
       const activeMk2 = activeMonthKey();
       const activeCaps2 = MONTHS[activeMk2]?.capsulesDef || [];
-      if (!state._capsulesVersion || state._capsulesVersion < 2) {
+      if (!state._capsulesVersion || state._capsulesVersion < 3) {
         activeCaps2.forEach(c => {
-          const oldVal = state.capsules[c.id] ?? 0;
-          state.capsules[c.id] = c.total - oldVal;
+          const val = state.capsules[c.id] ?? 0;
+          state.capsules[c.id] = c.total - val;
         });
-        state._capsulesVersion = 2;
+        state._capsulesVersion = 3;
       }
       // Ensure June chars exist
       Object.values(MONTHS).forEach(m => m.chars.forEach(def => {
