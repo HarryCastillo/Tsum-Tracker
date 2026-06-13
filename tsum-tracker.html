@@ -76,7 +76,7 @@
   .capsule-card.complete { background: linear-gradient(135deg,#0f3a1a,#0a2a10); border: 1px solid #2d8a4a; }
   .capsule-title { font-weight: 700; font-size: 13px; color: #e8f4ff; margin-bottom: 10px; }
   .capsule-progress { display: flex; align-items: center; gap: 10px; }
-  .capsule-bar-wrap { flex: 1; background: #071020; border-radius: 6px; height: 10px; overflow: hidden; border: 1px solid #1a3a6a; }
+  .capsule-bar-wrap { flex: 1; background: #071020; border-radius: 6px; height: 10px; overflow: hidden; border: 1px solid #1a3a6a; display: flex; justify-content: flex-end; }
   .capsule-bar-fill { height: 100%; background: linear-gradient(90deg,#f5a623,#f5c518); border-radius: 6px; transition: width 0.3s; }
   .capsule-count { font-size: 13px; font-weight: 800; color: #f5c518; min-width: 40px; text-align: right; }
   .capsule-btns { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
@@ -341,21 +341,12 @@ function loadState() {
           parsed.chars.push(JSON.parse(JSON.stringify(def)));
         }
       });
-      // Ensure capsules exist
+      // Ensure capsules exist; clamp values to valid range [0, cap.total]
       if (!parsed.capsules) parsed.capsules = buildInitialCapsules();
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
-        if (parsed.capsules[c.id] === undefined) parsed.capsules[c.id] = c.total;
+        const v = parsed.capsules[c.id];
+        if (v === undefined || v < 0 || v > c.total) parsed.capsules[c.id] = c.total;
       }));
-      // Migration v3: convert capsule values to "remaining" semantics
-      const activeMk = activeMonthKey();
-      const activeCapsuleDefs = MONTHS[activeMk]?.capsulesDef || [];
-      if (!parsed._capsulesVersion || parsed._capsulesVersion < 3) {
-        activeCapsuleDefs.forEach(c => {
-          const val = parsed.capsules[c.id] ?? 0;
-          parsed.capsules[c.id] = c.total - val;
-        });
-        parsed._capsulesVersion = 3;
-      }
       state = parsed;
     }
   } catch(e) {}
@@ -512,6 +503,12 @@ function changeCapsule(id, d) {
   state.capsules[id] = Math.max(0, Math.min(cap.total, (state.capsules[id] ?? cap.total) + d));
   saveLocal(); render();
 }
+function resetCapsule(id) {
+  const cap = Object.values(MONTHS).flatMap(m => m.capsulesDef).find(c => c.id === id);
+  if (!cap) return;
+  state.capsules[id] = cap.total;
+  saveLocal(); render();
+}
 
 // ── Sync ───────────────────────────────────────────────────────────────────────
 function setSyncMsg(text, color) {
@@ -547,21 +544,12 @@ async function syncDown() {
     const json = await res.json();
     if (json.ok && json.data) {
       state = json.data;
-      // Ensure new fields exist after pulling old state
+      // Ensure capsules exist; clamp values to valid range [0, cap.total]
       if (!state.capsules) state.capsules = buildInitialCapsules();
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
-        if (state.capsules[c.id] === undefined) state.capsules[c.id] = c.total;
+        const v = state.capsules[c.id];
+        if (v === undefined || v < 0 || v > c.total) state.capsules[c.id] = c.total;
       }));
-      // Migration v3: force-reconvert capsule values to "remaining" semantics
-      const activeMk2 = activeMonthKey();
-      const activeCaps2 = MONTHS[activeMk2]?.capsulesDef || [];
-      if (!state._capsulesVersion || state._capsulesVersion < 3) {
-        activeCaps2.forEach(c => {
-          const val = state.capsules[c.id] ?? 0;
-          state.capsules[c.id] = c.total - val;
-        });
-        state._capsulesVersion = 3;
-      }
       // Ensure June chars exist
       Object.values(MONTHS).forEach(m => m.chars.forEach(def => {
         if (!state.chars.find(c => c.id === def.id))
@@ -690,9 +678,10 @@ function render() {
           <div class="capsule-count">${remaining}/${cap.total}</div>
         </div>
         <div class="capsule-btns">
-          <button class="cap-btn" onclick="changeCapsule('${cap.id}',1)">−</button>
-          <button class="cap-btn" onclick="changeCapsule('${cap.id}',-1)">+</button>
+          <button class="cap-btn" onclick="changeCapsule('${cap.id}',-1)">−</button>
+          <button class="cap-btn" onclick="changeCapsule('${cap.id}',1)">+</button>
           <span style="font-size:10px;color:#4a7aaa;margin-left:6px">${bought} comprados</span>
+          <button onclick="resetCapsule('${cap.id}')" style="margin-left:8px;background:none;border:1px solid #2a5a8a;color:#4a7aaa;border-radius:4px;font-size:9px;padding:2px 6px;cursor:pointer">reset</button>
         </div>
         ${complete ? '<div class="capsule-reward">🎫 Skill Ticket obtenido</div>' : `<div style="font-size:11px;color:#4a7aaa;margin-top:6px">Faltan ${remaining} tsums por comprar</div>`}
       `;
