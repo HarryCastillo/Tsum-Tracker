@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tsum Tsum Tracker</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧸</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0a1628; color: #e8f4ff; font-family: 'Segoe UI', sans-serif; padding-bottom: 40px; }
@@ -339,11 +339,20 @@ function loadState() {
           parsed.chars.push(JSON.parse(JSON.stringify(def)));
         }
       });
-      // Ensure capsules exist
+      // Ensure capsules exist and migrate corrupted state from old versions.
+      // Old v8 logic stored "opened count" (0=none opened). New logic stores "remaining to buy" (cap.total=none bought).
+      // If ALL active capsules of current month are at 0, it's likely old/corrupted state — reset to cap.total.
       if (!parsed.capsules) parsed.capsules = buildInitialCapsules();
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
         if (parsed.capsules[c.id] === undefined) parsed.capsules[c.id] = c.total;
       }));
+      // Migration: if every capsule of the active month is 0, reset them all (old state artifact)
+      const activeMk = activeMonthKey();
+      const activeCapsuleDefs = MONTHS[activeMk]?.capsulesDef || [];
+      const allZero = activeCapsuleDefs.length > 0 && activeCapsuleDefs.every(c => parsed.capsules[c.id] === 0);
+      if (allZero) {
+        activeCapsuleDefs.forEach(c => { parsed.capsules[c.id] = c.total; });
+      }
       state = parsed;
     }
   } catch(e) {}
@@ -540,6 +549,12 @@ async function syncDown() {
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
         if (state.capsules[c.id] === undefined) state.capsules[c.id] = c.total;
       }));
+      // Migration: if every capsule of the active month is 0, reset (old state artifact)
+      const activeMk2 = activeMonthKey();
+      const activeCaps2 = MONTHS[activeMk2]?.capsulesDef || [];
+      if (activeCaps2.length > 0 && activeCaps2.every(c => state.capsules[c.id] === 0)) {
+        activeCaps2.forEach(c => { state.capsules[c.id] = c.total; });
+      }
       // Ensure June chars exist
       Object.values(MONTHS).forEach(m => m.chars.forEach(def => {
         if (!state.chars.find(c => c.id === def.id))
@@ -653,10 +668,12 @@ function render() {
     title.style.marginTop = "12px";
     capSection.appendChild(title);
     activeCaps.forEach(cap => {
+      // remaining = tsums left to buy. Full capsule = cap.total. Complete = 0.
       const remaining = state.capsules[cap.id] ?? cap.total;
       const complete = remaining === 0;
+      // Bar empties as you buy: starts full (100%), reaches 0% when done
+      const pct = Math.round((remaining / cap.total) * 100);
       const bought = cap.total - remaining;
-      const pct = Math.round((bought / cap.total) * 100); // bar grows as you buy: empty=none bought, full=complete
       const div = document.createElement("div");
       div.className = "capsule-card" + (complete ? " complete" : "");
       div.innerHTML = `
@@ -668,6 +685,7 @@ function render() {
         <div class="capsule-btns">
           <button class="cap-btn" onclick="changeCapsule('${cap.id}',-1)">−</button>
           <button class="cap-btn" onclick="changeCapsule('${cap.id}',1)">+</button>
+          <span style="font-size:10px;color:#4a7aaa;margin-left:6px">${bought} comprados</span>
         </div>
         ${complete ? '<div class="capsule-reward">🎫 Skill Ticket obtenido</div>' : `<div style="font-size:11px;color:#4a7aaa;margin-top:6px">Faltan ${remaining} tsums por comprar</div>`}
       `;
