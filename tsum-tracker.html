@@ -503,12 +503,6 @@ function changeCapsule(id, d) {
   state.capsules[id] = Math.max(0, Math.min(cap.total, (state.capsules[id] ?? cap.total) + d));
   saveLocal(); render();
 }
-function resetCapsule(id) {
-  const cap = Object.values(MONTHS).flatMap(m => m.capsulesDef).find(c => c.id === id);
-  if (!cap) return;
-  state.capsules[id] = cap.total;
-  saveLocal(); render();
-}
 
 // ── Sync ───────────────────────────────────────────────────────────────────────
 function setSyncMsg(text, color) {
@@ -678,10 +672,9 @@ function render() {
           <div class="capsule-count">${remaining}/${cap.total}</div>
         </div>
         <div class="capsule-btns">
-          <button class="cap-btn" onclick="changeCapsule('${cap.id}',-1)">−</button>
-          <button class="cap-btn" onclick="changeCapsule('${cap.id}',1)">+</button>
+          <button class="cap-btn" onclick="changeCapsule('${cap.id}',1)">−</button>
+          <button class="cap-btn" onclick="changeCapsule('${cap.id}',-1)">+</button>
           <span style="font-size:10px;color:#4a7aaa;margin-left:6px">${bought} comprados</span>
-          <button onclick="resetCapsule('${cap.id}')" style="margin-left:8px;background:none;border:1px solid #2a5a8a;color:#4a7aaa;border-radius:4px;font-size:9px;padding:2px 6px;cursor:pointer">reset</button>
         </div>
         ${complete ? '<div class="capsule-reward">🎫 Skill Ticket obtenido</div>' : `<div style="font-size:11px;color:#4a7aaa;margin-top:6px">Faltan ${remaining} tsums por comprar</div>`}
       `;
