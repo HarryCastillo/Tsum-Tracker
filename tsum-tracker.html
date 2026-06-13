@@ -6,6 +6,7 @@
 <title>Tsum Tsum Tracker</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0a1628; color: #e8f4ff; font-family: 'Segoe UI', sans-serif; padding-bottom: 40px; }
@@ -345,17 +346,30 @@ function loadState() {
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
         if (parsed.capsules[c.id] === undefined) parsed.capsules[c.id] = c.total;
       }));
-      // Migration v3: force-reconvert capsule values to "remaining" semantics.
-      // Previous migrations may have left state in "bought" semantics due to version flag already set.
+      // Migration v3: force-reconvert capsule values to "remaining" semantics
       const activeMk = activeMonthKey();
       const activeCapsuleDefs = MONTHS[activeMk]?.capsulesDef || [];
       if (!parsed._capsulesVersion || parsed._capsulesVersion < 3) {
         activeCapsuleDefs.forEach(c => {
           const val = parsed.capsules[c.id] ?? 0;
-          // Convert from bought → remaining
           parsed.capsules[c.id] = c.total - val;
         });
         parsed._capsulesVersion = 3;
+      }
+      // Migration: convert from old "bought" semantics to new "remaining" semantics.
+      // Old: value = tsums bought (0 = none bought, cap.total = all bought = complete)
+      // New: value = tsums remaining (cap.total = none bought, 0 = all bought = complete)
+      // Detection: if any active capsule has a value that looks like "bought" (i.e. cap.total - value makes more sense),
+      // we check via a version flag. If no version flag present, assume old state and convert.
+      const activeMk = activeMonthKey();
+      const activeCapsuleDefs = MONTHS[activeMk]?.capsulesDef || [];
+      if (!parsed._capsulesVersion || parsed._capsulesVersion < 2) {
+        // Convert: remaining = cap.total - oldValue (which was bought count)
+        activeCapsuleDefs.forEach(c => {
+          const oldVal = parsed.capsules[c.id] ?? 0;
+          parsed.capsules[c.id] = c.total - oldVal;
+        });
+        parsed._capsulesVersion = 2;
       }
       state = parsed;
     }
@@ -691,8 +705,8 @@ function render() {
           <div class="capsule-count">${remaining}/${cap.total}</div>
         </div>
         <div class="capsule-btns">
-          <button class="cap-btn" onclick="changeCapsule('${cap.id}',-1)">−</button>
-          <button class="cap-btn" onclick="changeCapsule('${cap.id}',1)">+</button>
+          <button class="cap-btn" onclick="changeCapsule('${cap.id}',1)">−</button>
+          <button class="cap-btn" onclick="changeCapsule('${cap.id}',-1)">+</button>
           <span style="font-size:10px;color:#4a7aaa;margin-left:6px">${bought} comprados</span>
         </div>
         ${complete ? '<div class="capsule-reward">🎫 Skill Ticket obtenido</div>' : `<div style="font-size:11px;color:#4a7aaa;margin-top:6px">Faltan ${remaining} tsums por comprar</div>`}
