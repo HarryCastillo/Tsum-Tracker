@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tsum Tsum Tracker</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0a1628; color: #e8f4ff; font-family: 'Segoe UI', sans-serif; padding-bottom: 40px; }
@@ -339,19 +340,25 @@ function loadState() {
           parsed.chars.push(JSON.parse(JSON.stringify(def)));
         }
       });
-      // Ensure capsules exist and migrate corrupted state from old versions.
-      // Old v8 logic stored "opened count" (0=none opened). New logic stores "remaining to buy" (cap.total=none bought).
-      // If ALL active capsules of current month are at 0, it's likely old/corrupted state — reset to cap.total.
+      // Ensure capsules exist
       if (!parsed.capsules) parsed.capsules = buildInitialCapsules();
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
         if (parsed.capsules[c.id] === undefined) parsed.capsules[c.id] = c.total;
       }));
-      // Migration: if every capsule of the active month is 0, reset them all (old state artifact)
+      // Migration: convert from old "bought" semantics to new "remaining" semantics.
+      // Old: value = tsums bought (0 = none bought, cap.total = all bought = complete)
+      // New: value = tsums remaining (cap.total = none bought, 0 = all bought = complete)
+      // Detection: if any active capsule has a value that looks like "bought" (i.e. cap.total - value makes more sense),
+      // we check via a version flag. If no version flag present, assume old state and convert.
       const activeMk = activeMonthKey();
       const activeCapsuleDefs = MONTHS[activeMk]?.capsulesDef || [];
-      const allZero = activeCapsuleDefs.length > 0 && activeCapsuleDefs.every(c => parsed.capsules[c.id] === 0);
-      if (allZero) {
-        activeCapsuleDefs.forEach(c => { parsed.capsules[c.id] = c.total; });
+      if (!parsed._capsulesVersion || parsed._capsulesVersion < 2) {
+        // Convert: remaining = cap.total - oldValue (which was bought count)
+        activeCapsuleDefs.forEach(c => {
+          const oldVal = parsed.capsules[c.id] ?? 0;
+          parsed.capsules[c.id] = c.total - oldVal;
+        });
+        parsed._capsulesVersion = 2;
       }
       state = parsed;
     }
@@ -549,11 +556,15 @@ async function syncDown() {
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
         if (state.capsules[c.id] === undefined) state.capsules[c.id] = c.total;
       }));
-      // Migration: if every capsule of the active month is 0, reset (old state artifact)
+      // Migration: convert from old "bought" semantics to new "remaining" semantics
       const activeMk2 = activeMonthKey();
       const activeCaps2 = MONTHS[activeMk2]?.capsulesDef || [];
-      if (activeCaps2.length > 0 && activeCaps2.every(c => state.capsules[c.id] === 0)) {
-        activeCaps2.forEach(c => { state.capsules[c.id] = c.total; });
+      if (!state._capsulesVersion || state._capsulesVersion < 2) {
+        activeCaps2.forEach(c => {
+          const oldVal = state.capsules[c.id] ?? 0;
+          state.capsules[c.id] = c.total - oldVal;
+        });
+        state._capsulesVersion = 2;
       }
       // Ensure June chars exist
       Object.values(MONTHS).forEach(m => m.chars.forEach(def => {
