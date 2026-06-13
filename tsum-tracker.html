@@ -7,11 +7,14 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0a1628; color: #e8f4ff; font-family: 'Segoe UI', sans-serif; padding-bottom: 40px; }
   .header { background: linear-gradient(135deg,#0d2a5e,#1a4a8a); padding: 16px; border-bottom: 2px solid #2a6abf; display: flex; justify-content: space-between; align-items: flex-start; }
-  .header-left .label { font-size: 15px; color: #ffffff; letter-spacing: 2px; text-transform: uppercase; font-weight: 800; }
+  .header-left .label { font-size: 20px; color: #ffffff; letter-spacing: 2px; font-family: 'Bubblegum Sans', cursive; text-shadow: 2px 2px 0px #0a3a8a, 0 0 10px rgba(77,208,225,0.35); }
   .header-left .month { font-size: 20px; font-weight: 800; margin-top: 2px; color: #fff; }
   .header-left .days { font-size: 11px; color: #90b8d8; margin-top: 2px; }
   .header-left .days span { color: #f5c518; font-weight: 700; }
@@ -165,9 +168,9 @@
   <div style="font-size:11px;color:#666">Actualiza el % · al llegar a 100 el skill sube solo</div>
   <div id="charCards"></div>
   <div class="total-card">
-    <div class="card-label">Total activos</div>
+    <div class="card-label">Tsums del mes faltantes</div>
     <div class="total-row">
-      <div class="total-item"><div class="total-item-label">Dups totales</div><div class="total-item-value" id="totalDups" style="color:#f5c518">—</div></div>
+      <div class="total-item"><div class="total-item-label">Tsums faltantes</div><div class="total-item-value" id="totalDups" style="color:#f5c518">—</div></div>
       <div class="total-item"><div class="total-item-label">Monedas</div><div class="total-item-value" id="totalCoins" style="color:#ff8c42;font-size:18px">—</div></div>
     </div>
   </div>
@@ -577,7 +580,7 @@ function render() {
   document.getElementById("statFaltan").textContent = fmt(falta);
   document.getElementById("statFaltan").style.color = falta === 0 ? "#7fff7f" : "#ff6b6b";
   document.getElementById("statFaltanSub").textContent = capsReq > 0
-    ? `${fmt(charsReq)} chars + ${fmt(capsReq)} caps`
+    ? `${fmt(charsReq)} Dups + ${fmt(capsReq)} caps`
     : Math.ceil(falta/30000) + " cajas";
   document.getElementById("statProm").textContent = avg > 0 ? fmt(avg) : "—";
   document.getElementById("statPromSub").textContent = uniqueDays + " días";
@@ -663,6 +666,7 @@ function render() {
       // Bar empties as you buy: starts full (100%), reaches 0% when done
       const pct = Math.round((remaining / cap.total) * 100);
       const bought = cap.total - remaining;
+      const capCoinsNeeded = remaining > 0 ? Math.round(remaining * (cfg.capsuleCost / cap.total)) : 0;
       const div = document.createElement("div");
       div.className = "capsule-card" + (complete ? " complete" : "");
       div.innerHTML = `
@@ -676,7 +680,9 @@ function render() {
           <button class="cap-btn" onclick="changeCapsule('${cap.id}',-1)">+</button>
           <span style="font-size:10px;color:#4a7aaa;margin-left:6px">${bought} comprados</span>
         </div>
-        ${complete ? '<div class="capsule-reward">🎫 Skill Ticket obtenido</div>' : `<div style="font-size:11px;color:#4a7aaa;margin-top:6px">Faltan ${remaining} tsums por comprar</div>`}
+        ${complete
+          ? '<div class="capsule-reward">🎫 Skill Ticket obtenido</div>'
+          : `<div style="font-size:11px;color:#4a7aaa;margin-top:6px">Faltan ${remaining} Tsums · <span style="color:#ff8c42;font-weight:700">${capCoinsNeeded.toLocaleString("es-MX")} monedas</span></div>`}
       `;
       capSection.appendChild(div);
     });
