@@ -346,7 +346,7 @@ function loadState() {
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
         if (parsed.capsules[c.id] === undefined) parsed.capsules[c.id] = c.total;
       }));
-      // Migration v3: force-reconvert capsule values to "remaining" semantics
+      // Migration v3: convert capsule values to "remaining" semantics
       const activeMk = activeMonthKey();
       const activeCapsuleDefs = MONTHS[activeMk]?.capsulesDef || [];
       if (!parsed._capsulesVersion || parsed._capsulesVersion < 3) {
@@ -355,21 +355,6 @@ function loadState() {
           parsed.capsules[c.id] = c.total - val;
         });
         parsed._capsulesVersion = 3;
-      }
-      // Migration: convert from old "bought" semantics to new "remaining" semantics.
-      // Old: value = tsums bought (0 = none bought, cap.total = all bought = complete)
-      // New: value = tsums remaining (cap.total = none bought, 0 = all bought = complete)
-      // Detection: if any active capsule has a value that looks like "bought" (i.e. cap.total - value makes more sense),
-      // we check via a version flag. If no version flag present, assume old state and convert.
-      const activeMk = activeMonthKey();
-      const activeCapsuleDefs = MONTHS[activeMk]?.capsulesDef || [];
-      if (!parsed._capsulesVersion || parsed._capsulesVersion < 2) {
-        // Convert: remaining = cap.total - oldValue (which was bought count)
-        activeCapsuleDefs.forEach(c => {
-          const oldVal = parsed.capsules[c.id] ?? 0;
-          parsed.capsules[c.id] = c.total - oldVal;
-        });
-        parsed._capsulesVersion = 2;
       }
       state = parsed;
     }
