@@ -239,6 +239,21 @@ const MONTHS = {
       { id:"cap_jun_2", name:"Pick Up Capsule #2", total:15 },
     ],
   },
+  "2026-07": {
+    name: "Julio 2026",
+    endDate: "2026-07-31",
+    capsules: 2, premiumTicketsPerCapsule: 6, capsuleCost: 450000,
+    selectBoxes: 4, selectBoxBudget: 360000,
+    chars: [
+      { id:"coronation_elsa", name:"Coronation Elsa",  skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
+      { id:"formal_beast",    name:"Formal Beast",     skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
+      { id:"fancyhat_mickey", name:"Fancy Hat Mickey", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,16] },
+    ],
+    capsulesDef: [
+      { id:"cap_jul_1", name:"Pick Up Capsule #1", total:15 },
+      { id:"cap_jul_2", name:"Pick Up Capsule #2", total:15 },
+    ],
+  },
 };
 
 function currentMonthKey() {
@@ -248,7 +263,8 @@ function currentMonthKey() {
 }
 function activeMonthKey() {
   const k = currentMonthKey();
-  return MONTHS[k] ? k : "2026-05";
+  if (MONTHS[k]) return k;
+  return Object.keys(MONTHS).sort().pop(); // mes más reciente como fallback
 }
 function getMonthConfig() { return MONTHS[activeMonthKey()]; }
 
