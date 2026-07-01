@@ -247,7 +247,7 @@ const MONTHS = {
     chars: [
       { id:"coronation_elsa", name:"Coronation Elsa",  skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
       { id:"formal_beast",    name:"Formal Beast",     skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
-      { id:"fancyhat_mickey", name:"Fancy Hat Mickey", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,16] },
+      { id:"fancyhat_mickey", name:"Dapper Hat Mickey", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,16] },
     ],
     capsulesDef: [
       { id:"cap_jul_1", name:"Pick Up Capsule #1", total:15 },
@@ -360,6 +360,9 @@ function loadState() {
           parsed.chars.push(JSON.parse(JSON.stringify(def)));
         }
       });
+      // Migración de nombre: fancyhat_mickey -> Dapper Hat Mickey
+      const dapperMickey = parsed.chars.find(c => c.id === "fancyhat_mickey");
+      if (dapperMickey && dapperMickey.name !== "Dapper Hat Mickey") dapperMickey.name = "Dapper Hat Mickey";
       // Ensure capsules exist; clamp values to valid range [0, cap.total]
       if (!parsed.capsules) parsed.capsules = buildInitialCapsules();
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
@@ -568,6 +571,9 @@ async function syncDown() {
         if (!state.chars.find(c => c.id === def.id))
           state.chars.push(JSON.parse(JSON.stringify(def)));
       }));
+      // Migración de nombre: fancyhat_mickey -> Dapper Hat Mickey
+      const dapperMickeyDown = state.chars.find(c => c.id === "fancyhat_mickey");
+      if (dapperMickeyDown && dapperMickeyDown.name !== "Dapper Hat Mickey") dapperMickeyDown.name = "Dapper Hat Mickey";
       saveLocal(); render();
       setSyncMsg("⬇️ Datos bajados de Sheets", "#7fbfff");
     } else setSyncMsg("✗ Sin datos en Sheets", "#ff6b6b");
@@ -580,7 +586,8 @@ function render() {
   const cfg = getMonthConfig();
   const days = daysLeft();
   const coinsReq = totalCoinsNeeded();
-  const falta = Math.max(0, coinsReq - state.coins);
+  const ticketsValueOwned = state.premiumTickets * 30000;
+  const falta = Math.max(0, coinsReq - state.coins - ticketsValueOwned);
   const avg = avgDaily();
   const proj = state.coins + avg * days;
   const onTrack = proj >= coinsReq;
@@ -596,7 +603,7 @@ function render() {
   document.getElementById("statFaltan").textContent = fmt(falta);
   document.getElementById("statFaltan").style.color = falta === 0 ? "#7fff7f" : "#ff6b6b";
   document.getElementById("statFaltanSub").textContent = capsReq > 0
-    ? `${fmt(charsReq)} Dups + ${fmt(capsReq)} caps`
+    ? `${fmt(charsReq)} Dups + ${fmt(capsReq)} caps${ticketsValueOwned > 0 ? ` − ${fmt(ticketsValueOwned)} tickets` : ""}`
     : Math.ceil(falta/30000) + " cajas";
   document.getElementById("statProm").textContent = avg > 0 ? fmt(avg) : "—";
   document.getElementById("statPromSub").textContent = uniqueDays + " días";
