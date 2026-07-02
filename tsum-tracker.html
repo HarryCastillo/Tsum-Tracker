@@ -198,7 +198,10 @@
 
 <!-- HISTORIAL -->
 <div id="tab-historial" class="content hidden">
-  <div style="font-size:11px;color:#666" id="histCount">0 registros</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <div style="font-size:11px;color:#666" id="histCount">0 registros</div>
+    <button class="sync-down" style="font-size:10px;padding:6px 10px" onclick="archivePastMonths()">📦 Archivar mes anterior</button>
+  </div>
   <div id="histList" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
 </div>
 
@@ -312,6 +315,7 @@ let state = {
   selectBoxesOpened: 0,
   selectBoxCoinsSpent: 0,
   capsules: buildInitialCapsules(),
+  archivedStats: { totalGained: 0, days: 0 },
 };
 
 // ── Persist ────────────────────────────────────────────────────────────────────
@@ -369,6 +373,7 @@ function loadState() {
         const v = parsed.capsules[c.id];
         if (v === undefined || v < 0 || v > c.total) parsed.capsules[c.id] = c.total;
       }));
+      if (!parsed.archivedStats) parsed.archivedStats = { totalGained: 0, days: 0 };
       state = parsed;
     }
   } catch(e) {}
@@ -429,8 +434,12 @@ function currentMonthLogs() {
   });
 }
 function avgDaily() {
-  if (state.log.length < 2) return 0;
-  // Sum positive deltas per calendar day (histórico completo)
+  if (state.log.length < 2) {
+    const d = state.archivedStats?.days || 0;
+    if (d === 0) return 0;
+    return Math.round(state.archivedStats.totalGained / d);
+  }
+  // Sum positive deltas per calendar day (log vivo actual)
   const byDay = {};
   for (let i = 1; i < state.log.length; i++) {
     const e = state.log[i];
@@ -438,9 +447,44 @@ function avgDaily() {
     const delta = e.coins - state.log[i-1].coins;
     if (delta > 0) byDay[k] = (byDay[k] || 0) + delta;
   }
+  const liveDayKeys = Object.keys(byDay);
+  const liveSum = liveDayKeys.reduce((s,k) => s + byDay[k], 0);
+  const archivedGained = state.archivedStats?.totalGained || 0;
+  const archivedDays = state.archivedStats?.days || 0;
+  const totalDays = archivedDays + liveDayKeys.length;
+  if (totalDays === 0) return 0;
+  return Math.round((archivedGained + liveSum) / totalDays);
+}
+function avgDailyDayCount() {
+  const liveDays = new Set(state.log.map(e => dayKey(e.ts))).size;
+  return (state.archivedStats?.days || 0) + liveDays;
+}
+function archivePastMonths() {
+  const active = activeMonthKey();
+  const sorted = [...state.log].sort((a,b) => a.ts - b.ts);
+  let lastOldIdx = -1;
+  for (let i = 0; i < sorted.length; i++) {
+    const d = new Date(sorted[i].ts);
+    const mk = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,"0")}`;
+    if (mk < active) lastOldIdx = i;
+  }
+  if (lastOldIdx <= 0) { setSyncMsg("No hay meses anteriores que archivar", "#aaa"); return; }
+  const byDay = {};
+  for (let i = 1; i <= lastOldIdx; i++) {
+    const k = dayKey(sorted[i].ts);
+    const delta = sorted[i].coins - sorted[i-1].coins;
+    if (delta > 0) byDay[k] = (byDay[k] || 0) + delta;
+  }
   const dayKeys = Object.keys(byDay);
-  if (dayKeys.length === 0) return 0;
-  return Math.round(dayKeys.reduce((s,k) => s + byDay[k], 0) / dayKeys.length);
+  const sum = dayKeys.reduce((s,k) => s + byDay[k], 0);
+  if (!state.archivedStats) state.archivedStats = { totalGained: 0, days: 0 };
+  state.archivedStats.totalGained += sum;
+  state.archivedStats.days += dayKeys.length;
+  const removedCount = lastOldIdx; // se elimina [0..lastOldIdx-1], se conserva sorted[lastOldIdx] como ancla
+  state.log = sorted.slice(lastOldIdx);
+  saveLocal();
+  render();
+  setSyncMsg(`📦 ${removedCount} registros archivados`, "#7fbfff");
 }
 function coinsGainedToday() {
   const tk = todayKey();
@@ -566,6 +610,7 @@ async function syncDown() {
         const v = state.capsules[c.id];
         if (v === undefined || v < 0 || v > c.total) state.capsules[c.id] = c.total;
       }));
+      if (!state.archivedStats) state.archivedStats = { totalGained: 0, days: 0 };
       // Ensure June chars exist
       Object.values(MONTHS).forEach(m => m.chars.forEach(def => {
         if (!state.chars.find(c => c.id === def.id))
@@ -585,25 +630,28 @@ async function syncDown() {
 function render() {
   const cfg = getMonthConfig();
   const days = daysLeft();
-  const coinsReq = totalCoinsNeeded();
+  const charsReq = activeChars().reduce((s,c) => s + dupsRemaining(c) * 30000, 0);
+  const capsReq = totalCapsuleCoinsNeeded();
+  const coinsReq = charsReq + capsReq;
   const ticketsValueOwned = state.premiumTickets * 30000;
-  const falta = Math.max(0, coinsReq - state.coins - ticketsValueOwned);
+  // Los tickets solo se aplican al costo de skills, nunca a las Pick Up Capsules
+  const ticketsApplied = Math.min(ticketsValueOwned, charsReq);
+  const effectiveReq = (charsReq - ticketsApplied) + capsReq;
+  const falta = Math.max(0, effectiveReq - state.coins);
   const avg = avgDaily();
   const proj = state.coins + avg * days;
-  const onTrack = proj >= coinsReq;
-  const uniqueDays = new Set(state.log.map(e => dayKey(e.ts))).size;
+  const onTrack = proj >= effectiveReq;
+  const uniqueDays = avgDailyDayCount();
   const hoy = coinsGainedToday();
   const mes = totalCoinsGainedMonth();
 
   document.getElementById("daysLeft").textContent = days;
   document.getElementById("coinInput").value = state.coins.toLocaleString("es-MX");
   document.getElementById("coinsSub").textContent = state.coins.toLocaleString("es-MX") + " monedas";
-  const charsReq = activeChars().reduce((s,c) => s + dupsRemaining(c) * 30000, 0);
-  const capsReq = totalCapsuleCoinsNeeded();
   document.getElementById("statFaltan").textContent = fmt(falta);
   document.getElementById("statFaltan").style.color = falta === 0 ? "#7fff7f" : "#ff6b6b";
   document.getElementById("statFaltanSub").textContent = capsReq > 0
-    ? `${fmt(charsReq)} Dups + ${fmt(capsReq)} caps${ticketsValueOwned > 0 ? ` − ${fmt(ticketsValueOwned)} tickets` : ""}`
+    ? `${fmt(charsReq)} Dups + ${fmt(capsReq)} caps${ticketsApplied > 0 ? ` − ${fmt(ticketsApplied)} tickets` : ""}`
     : Math.ceil(falta/30000) + " cajas";
   document.getElementById("statProm").textContent = avg > 0 ? fmt(avg) : "—";
   document.getElementById("statPromSub").textContent = uniqueDays + " días";
@@ -618,7 +666,7 @@ function render() {
   document.getElementById("trackTitle").style.color = onTrack ? "#7fff7f" : "#ff6b6b";
   const diff = proj - coinsReq;
   document.getElementById("trackSub").textContent =
-    `Necesitas ${coinsReq.toLocaleString("es-MX")} · Proyectado ${fmt(proj)} (avg×días + saldo)`;
+    `Necesitas ${effectiveReq.toLocaleString("es-MX")} · Proyectado ${fmt(proj)} (avg×días + saldo)`;
   document.getElementById("ticketCount").textContent = state.premiumTickets;
   document.getElementById("ticketSub").textContent = "≈ " + (state.premiumTickets * 30000).toLocaleString("es-MX") + " monedas";
 
@@ -725,9 +773,14 @@ function render() {
   // ── Historial ──────────────────────────────────────────────────────────────
   const histList = document.getElementById("histList");
   histList.innerHTML = "";
-  document.getElementById("histCount").textContent = state.log.length + " registros";
-  [...state.log].reverse().forEach((e, ri) => {
-    const idx = state.log.length - 1 - ri;
+  const cutoffTs = Date.now() - 3 * 86400000;
+  const recentEntries = state.log
+    .map((e, idx) => ({ ...e, _idx: idx }))
+    .filter(e => e.ts >= cutoffTs);
+  document.getElementById("histCount").textContent =
+    `${recentEntries.length} de últimos 3 días · ${state.log.length} en total`;
+  [...recentEntries].reverse().forEach(e => {
+    const idx = e._idx;
     const prev = idx > 0 ? state.log[idx-1] : null;
     const delta = prev ? e.coins - prev.coins : null;
     const div = document.createElement("div");
