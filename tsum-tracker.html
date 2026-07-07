@@ -125,7 +125,6 @@
 <div class="tabs">
   <button class="tab active" onclick="showTab('dashboard',this)">Dashboard</button>
   <button class="tab" onclick="showTab('avance',this)">Avance</button>
-  <button class="tab" onclick="showTab('presupuesto',this)">Presupuesto</button>
   <button class="tab" onclick="showTab('historial',this)">Historial</button>
 </div>
 
@@ -175,25 +174,6 @@
     </div>
   </div>
   <div id="capsuleSection"></div>
-</div>
-
-<!-- PRESUPUESTO -->
-<div id="tab-presupuesto" class="content hidden">
-  <div class="budget-row"><div><div class="budget-label">Skill personajes nuevos</div><div class="budget-note" id="bSkillNote">—</div></div><div class="budget-amount" style="color:#a07bff" id="bSkill">—</div></div>
-  <div class="budget-row"><div><div class="budget-label">Pick Up Capsules (×2)</div><div class="budget-note">450,000 c/u</div></div><div class="budget-amount" style="color:#f5c518">900,000</div></div>
-  <div class="budget-row"><div><div class="budget-label">− Premium Tickets est.</div><div class="budget-note">12 tickets × 30,000</div></div><div class="budget-amount" style="color:#7fff7f">−360,000</div></div>
-  <div class="budget-row"><div><div class="budget-label">Select Boxes (×4)</div><div class="budget-note">360,000 c/u (est.)</div></div><div class="budget-amount" style="color:#ff8c42">1,440,000</div></div>
-  <div class="budget-total"><div class="budget-total-label">TOTAL ESTIMADO</div><div class="budget-total-amount" id="bTotal">—</div></div>
-  <div class="card">
-    <div class="card-label">Select Boxes — Gasto Real</div>
-    <div class="box-row">
-      <span style="font-size:12px;color:#888">Cajas:</span>
-      <button class="box-btn" onclick="changeBoxes(-1)">−</button>
-      <span class="box-count" id="boxCount">0</span>
-      <button class="box-btn" onclick="changeBoxes(1)">+</button>
-    </div>
-    <div class="box-stats" id="boxStats">Gasto: <span style="color:#ff8c42;font-weight:700">0</span> · Prom/caja: <span style="color:#ff8c42;font-weight:700">—</span></div>
-  </div>
 </div>
 
 <!-- HISTORIAL -->
@@ -248,8 +228,8 @@ const MONTHS = {
     capsules: 2, premiumTicketsPerCapsule: 6, capsuleCost: 450000,
     selectBoxes: 4, selectBoxBudget: 360000,
     chars: [
-      { id:"coronation_elsa", name:"Coronation Elsa",  skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
-      { id:"formal_beast",    name:"Formal Beast",     skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
+      { id:"coronation_elsa", name:"Coronation Day Elsa", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
+      { id:"formal_beast",    name:"Formal Suit Beast", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,20] },
       { id:"fancyhat_mickey", name:"Dapper Hat Mickey", skillCurrent:1, skillMax:6, skillPct:0, upgrades:[1,1,2,4,8,16] },
     ],
     capsulesDef: [
@@ -367,6 +347,10 @@ function loadState() {
       // Migración de nombre: fancyhat_mickey -> Dapper Hat Mickey
       const dapperMickey = parsed.chars.find(c => c.id === "fancyhat_mickey");
       if (dapperMickey && dapperMickey.name !== "Dapper Hat Mickey") dapperMickey.name = "Dapper Hat Mickey";
+      const formalBeast = parsed.chars.find(c => c.id === "formal_beast");
+      if (formalBeast && formalBeast.name !== "Formal Suit Beast") formalBeast.name = "Formal Suit Beast";
+      const coronationElsa = parsed.chars.find(c => c.id === "coronation_elsa");
+      if (coronationElsa && coronationElsa.name !== "Coronation Day Elsa") coronationElsa.name = "Coronation Day Elsa";
       // Ensure capsules exist; clamp values to valid range [0, cap.total]
       if (!parsed.capsules) parsed.capsules = buildInitialCapsules();
       Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
@@ -547,11 +531,6 @@ function applyAndLog() {
 }
 function deleteLog(idx) { state.log.splice(idx,1); saveLocal(); render(); }
 function changeTickets(d) { state.premiumTickets = Math.max(0, state.premiumTickets + d); saveLocal(); render(); }
-function changeBoxes(d) {
-  state.selectBoxesOpened = Math.max(0, state.selectBoxesOpened + d);
-  state.selectBoxCoinsSpent = Math.max(0, state.selectBoxCoinsSpent + d * 30000);
-  saveLocal(); render();
-}
 function updateCharPct(id, val) {
   const c = state.chars.find(c => c.id === id);
   if (!c) return;
@@ -619,6 +598,10 @@ async function syncDown() {
       // Migración de nombre: fancyhat_mickey -> Dapper Hat Mickey
       const dapperMickeyDown = state.chars.find(c => c.id === "fancyhat_mickey");
       if (dapperMickeyDown && dapperMickeyDown.name !== "Dapper Hat Mickey") dapperMickeyDown.name = "Dapper Hat Mickey";
+      const formalBeastDown = state.chars.find(c => c.id === "formal_beast");
+      if (formalBeastDown && formalBeastDown.name !== "Formal Suit Beast") formalBeastDown.name = "Formal Suit Beast";
+      const coronationElsaDown = state.chars.find(c => c.id === "coronation_elsa");
+      if (coronationElsaDown && coronationElsaDown.name !== "Coronation Day Elsa") coronationElsaDown.name = "Coronation Day Elsa";
       saveLocal(); render();
       setSyncMsg("⬇️ Datos bajados de Sheets", "#7fbfff");
     } else setSyncMsg("✗ Sin datos en Sheets", "#ff6b6b");
@@ -758,17 +741,6 @@ function render() {
       capSection.appendChild(div);
     });
   }
-
-  // ── Presupuesto ────────────────────────────────────────────────────────────
-  const capsuleBudget = cfg.capsules * cfg.capsuleCost;
-  const ticketsValue = cfg.capsules * cfg.premiumTicketsPerCapsule * 30000;
-  const selectBoxTotal = cfg.selectBoxes * cfg.selectBoxBudget;
-  const grandTotal = coinsReq + capsuleBudget + selectBoxTotal - ticketsValue;
-  document.getElementById("bSkill").textContent = coinsReq.toLocaleString("es-MX");
-  document.getElementById("bSkillNote").textContent = totalDups + " dups × 30,000";
-  document.getElementById("bTotal").textContent = grandTotal.toLocaleString("es-MX");
-  document.getElementById("boxCount").textContent = state.selectBoxesOpened;
-  document.getElementById("boxStats").innerHTML = `Gasto: <span style="color:#ff8c42;font-weight:700">${state.selectBoxCoinsSpent.toLocaleString("es-MX")}</span> · Prom/caja: <span style="color:#ff8c42;font-weight:700">${state.selectBoxesOpened > 0 ? Math.round(state.selectBoxCoinsSpent/state.selectBoxesOpened).toLocaleString("es-MX") : "—"}</span>`;
 
   // ── Historial ──────────────────────────────────────────────────────────────
   const histList = document.getElementById("histList");
