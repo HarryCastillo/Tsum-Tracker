@@ -133,8 +133,7 @@
   <div class="card">
     <div class="card-label">Registrar Saldo</div>
     <input type="text" inputmode="numeric" class="coins-input" id="coinInput" value="468,000" oninput="formatCoinInput(this)">
-    <input type="text" class="log-input" id="logNote" placeholder="Nota (opcional)">
-    <button class="apply-btn" onclick="applyAndLog()" style="margin-top:8px">✓ Aplicar y Registrar</button>
+    <button class="apply-btn" onclick="applyAndLog()" style="margin-top:8px">✓ Registrar</button>
     <div class="coins-sub" id="coinsSub">468,000 monedas</div>
   </div>
   <div class="stat-row">
@@ -523,9 +522,7 @@ function applyAndLog() {
   const v = getCoinInputValue();
   if (v === null || isNaN(v)) return;
   state.coins = v;
-  const note = document.getElementById("logNote").value.trim();
-  state.log.push({ ts: Date.now(), coins: v, note });
-  document.getElementById("logNote").value = "";
+  state.log.push({ ts: Date.now(), coins: v, note: "" });
   saveLocal();
   render();
 }
