@@ -32,7 +32,7 @@
   .coins-input { width: 100%; background: #071020; color: #f5c518; border: 2px solid #1a4a8a; border-radius: 8px; padding: 6px 10px; font-size: 16px; font-weight: 800; margin-bottom: 8px; }
   .apply-btn { width: 100%; background: linear-gradient(135deg,#f5a623,#e8922a); color: #1a2a4a; border: none; border-radius: 8px; padding: 10px; font-weight: 800; cursor: pointer; font-size: 15px; }
   .apply-btn:active { opacity: 0.85; }
-  .coins-sub { font-size: 10px; color: #4a7aaa; margin-top: 4px; }
+  .coins-sub { font-size: 10px; color: #4a7aaa; margin-top: 4px; visibility: hidden; }
   .log-input { width: 100%; background: #071020; color: #e8f4ff; border: 1px solid #1a4a8a; border-radius: 8px; padding: 8px 10px; font-size: 12px; margin-top: 8px; }
   .stat-row { display: flex; gap: 8px; }
   .stat-box { background: linear-gradient(135deg,#0d2040,#112a50); border: 1px solid #1a4a8a; border-radius: 12px; padding: 12px 10px; flex: 1; }
@@ -416,42 +416,51 @@ function currentMonthLogs() {
     return d.getFullYear() === y && (d.getMonth() + 1) === m;
   });
 }
-function avgDaily() {
-  if (state.log.length < 2) {
-    const d = state.archivedStats?.days || 0;
-    if (d === 0) return 0;
-    return Math.round(state.archivedStats.totalGained / d);
+function rolling30Stats() {
+  // Promedio sobre los últimos 30 días naturales. Se usa un registro "ancla"
+  // justo antes de la ventana (si existe) solo para calcular bien el primer
+  // delta, igual que en coinsGainedToday(); ese registro ancla no cuenta
+  // como día dentro del promedio.
+  const cutoff = Date.now() - 30 * 86400000;
+  const sorted = [...state.log].sort((a,b) => a.ts - b.ts);
+  let anchorIdx = -1;
+  for (let i = 0; i < sorted.length; i++) {
+    if (sorted[i].ts < cutoff) anchorIdx = i;
+    else break;
   }
-  // Sum positive deltas per calendar day (log vivo actual)
+  const windowEntries = anchorIdx >= 0 ? sorted.slice(anchorIdx) : sorted;
+  if (windowEntries.length < 2) return { sum: 0, days: 0 };
   const byDay = {};
-  for (let i = 1; i < state.log.length; i++) {
-    const e = state.log[i];
-    const k = dayKey(e.ts);
-    const delta = e.coins - state.log[i-1].coins;
+  for (let i = 1; i < windowEntries.length; i++) {
+    const k = dayKey(windowEntries[i].ts);
+    const delta = windowEntries[i].coins - windowEntries[i-1].coins;
     if (delta > 0) byDay[k] = (byDay[k] || 0) + delta;
   }
-  const liveDayKeys = Object.keys(byDay);
-  const liveSum = liveDayKeys.reduce((s,k) => s + byDay[k], 0);
-  const archivedGained = state.archivedStats?.totalGained || 0;
-  const archivedDays = state.archivedStats?.days || 0;
-  const totalDays = archivedDays + liveDayKeys.length;
-  if (totalDays === 0) return 0;
-  return Math.round((archivedGained + liveSum) / totalDays);
+  const dayKeys = Object.keys(byDay);
+  const sum = dayKeys.reduce((s,k) => s + byDay[k], 0);
+  return { sum, days: dayKeys.length };
+}
+function avgDaily() {
+  const { sum, days } = rolling30Stats();
+  if (days === 0) return 0;
+  return Math.round(sum / days);
 }
 function avgDailyDayCount() {
-  const liveDays = new Set(state.log.map(e => dayKey(e.ts))).size;
-  return (state.archivedStats?.days || 0) + liveDays;
+  return rolling30Stats().days;
 }
 function archivePastMonths() {
   const active = activeMonthKey();
+  const cutoff = Date.now() - 30 * 86400000;
   const sorted = [...state.log].sort((a,b) => a.ts - b.ts);
   let lastOldIdx = -1;
   for (let i = 0; i < sorted.length; i++) {
     const d = new Date(sorted[i].ts);
     const mk = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,"0")}`;
-    if (mk < active) lastOldIdx = i;
+    // Solo se archiva lo que es de un mes anterior Y tiene más de 30 días,
+    // para no quitarle datos a la ventana del promedio rolling.
+    if (mk < active && sorted[i].ts < cutoff) lastOldIdx = i;
   }
-  if (lastOldIdx <= 0) { setSyncMsg("No hay meses anteriores que archivar", "#aaa"); return; }
+  if (lastOldIdx <= 0) { setSyncMsg("No hay registros de meses anteriores con más de 30 días", "#aaa"); return; }
   const byDay = {};
   for (let i = 1; i <= lastOldIdx; i++) {
     const k = dayKey(sorted[i].ts);
@@ -627,7 +636,6 @@ function render() {
 
   document.getElementById("daysLeft").textContent = days;
   document.getElementById("coinInput").value = state.coins.toLocaleString("es-MX");
-  document.getElementById("coinsSub").textContent = state.coins.toLocaleString("es-MX") + " monedas";
   document.getElementById("statFaltan").textContent = fmt(falta);
   document.getElementById("statFaltan").style.color = falta === 0 ? "#7fff7f" : "#ff6b6b";
   document.getElementById("statFaltanSub").textContent = capsReq > 0
