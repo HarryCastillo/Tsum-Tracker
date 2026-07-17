@@ -417,28 +417,35 @@ function currentMonthLogs() {
   });
 }
 function rolling30Stats() {
-  // Promedio sobre los últimos 30 días naturales. Se usa un registro "ancla"
-  // justo antes de la ventana (si existe) solo para calcular bien el primer
-  // delta, igual que en coinsGainedToday(); ese registro ancla no cuenta
-  // como día dentro del promedio.
+  // Numerador: suma de deltas positivos por día (igual que antes).
+  // Denominador: TODOS los días calendario dentro de la ventana de 30 días
+  // (o desde el primer registro si el tracking empezó hace menos de 30 días),
+  // aunque no haya registro ese día — un día sin registrar cuenta como 0,
+  // para que no se infle el promedio si te saltas un día.
+  if (state.log.length === 0) return { sum: 0, days: 0 };
   const cutoff = Date.now() - 30 * 86400000;
   const sorted = [...state.log].sort((a,b) => a.ts - b.ts);
+  const earliestTs = sorted[0].ts;
   let anchorIdx = -1;
   for (let i = 0; i < sorted.length; i++) {
     if (sorted[i].ts < cutoff) anchorIdx = i;
     else break;
   }
   const windowEntries = anchorIdx >= 0 ? sorted.slice(anchorIdx) : sorted;
-  if (windowEntries.length < 2) return { sum: 0, days: 0 };
   const byDay = {};
-  for (let i = 1; i < windowEntries.length; i++) {
-    const k = dayKey(windowEntries[i].ts);
-    const delta = windowEntries[i].coins - windowEntries[i-1].coins;
-    if (delta > 0) byDay[k] = (byDay[k] || 0) + delta;
+  if (windowEntries.length >= 2) {
+    for (let i = 1; i < windowEntries.length; i++) {
+      const k = dayKey(windowEntries[i].ts);
+      const delta = windowEntries[i].coins - windowEntries[i-1].coins;
+      if (delta > 0) byDay[k] = (byDay[k] || 0) + delta;
+    }
   }
-  const dayKeys = Object.keys(byDay);
-  const sum = dayKeys.reduce((s,k) => s + byDay[k], 0);
-  return { sum, days: dayKeys.length };
+  const sum = Object.values(byDay).reduce((s,v) => s+v, 0);
+  const windowStartTs = Math.max(cutoff, earliestTs);
+  const startMid = new Date(windowStartTs); startMid.setHours(0,0,0,0);
+  const todayMid = new Date(); todayMid.setHours(0,0,0,0);
+  const days = Math.max(1, Math.round((todayMid - startMid) / 86400000) + 1);
+  return { sum, days };
 }
 function avgDaily() {
   const { sum, days } = rolling30Stats();
