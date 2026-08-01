@@ -250,9 +250,18 @@ function currentMonthKey() {
   return `${now.getFullYear()}-${m}`;
 }
 function activeMonthKey() {
-  const k = currentMonthKey();
-  if (MONTHS[k]) return k;
-  return Object.keys(MONTHS).sort().pop(); // mes más reciente como fallback
+  // El mes activo ya NO se decide por el mes calendario real, sino por el
+  // endDate de cada mes en config_months: se toma el primer mes (en orden)
+  // cuyo endDate todavía no ha pasado. Esto porque los eventos del juego no
+  // cierran el último día del mes calendario (ej. cierran el 30, no el 31),
+  // y a veces el mes nuevo se libera un día antes de que cambie el calendario.
+  const keys = Object.keys(MONTHS).sort();
+  const now = new Date();
+  for (const k of keys) {
+    const end = new Date(MONTHS[k].endDate + "T23:59:59");
+    if (now <= end) return k;
+  }
+  return keys[keys.length - 1]; // todos los meses definidos ya vencieron; usar el más reciente
 }
 function getMonthConfig() { return MONTHS[activeMonthKey()]; }
 
