@@ -18,9 +18,9 @@
   .header-left .month { font-size: 20px; font-weight: 800; margin-top: 2px; color: #fff; }
   .header-left .days { font-size: 11px; color: #90b8d8; margin-top: 2px; }
   .header-left .days span { color: #f5c518; font-weight: 700; }
-  .sync-row { display: flex; gap: 6px; }
-  .sync-up { background: linear-gradient(135deg,#1a5c2a,#0f3a1a); color: #4dff91; border: 1px solid #2d8a4a; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; font-size: 12px; }
-  .sync-down { background: linear-gradient(135deg,#0d2a5e,#1a4a8a); color: #4dd0e1; border: 1px solid #2a6abf; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; font-size: 12px; }
+  .sync-row { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; max-width: 160px; }
+  .sync-up { background: linear-gradient(135deg,#1a5c2a,#0f3a1a); color: #4dff91; border: 1px solid #2d8a4a; border-radius: 8px; padding: 7px 9px; font-weight: 700; cursor: pointer; font-size: 11px; }
+  .sync-down { background: linear-gradient(135deg,#0d2a5e,#1a4a8a); color: #4dd0e1; border: 1px solid #2a6abf; border-radius: 8px; padding: 7px 9px; font-weight: 700; cursor: pointer; font-size: 11px; }
   .sync-up:disabled, .sync-down:disabled { opacity: 0.5; cursor: default; }
   .save-msg { font-size: 10px; margin-top: 4px; text-align: right; min-height: 14px; }
   .tabs { display: flex; background: #071020; border-bottom: 2px solid #1a3a6a; }
@@ -117,6 +117,7 @@
     <div class="sync-row">
       <button class="sync-up" id="syncUpBtn" onclick="sync()">☁️ Subir</button>
       <button class="sync-down" id="syncDownBtn" onclick="syncDown()">⬇️ Bajar</button>
+      <button class="sync-down" id="configBtn" onclick="syncConfig(false)">⚙️ Catálogo</button>
     </div>
     <div class="save-msg" id="saveMsg"></div>
   </div>
@@ -187,9 +188,14 @@
 <script>
 // ── Config ─────────────────────────────────────────────────────────────────────
 const STORAGE_KEY = "tsum_tracker_v1";
+const CONFIG_STORAGE_KEY = "tsum_tracker_config_v1";
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznMEKIiCMjSSCPkC0LgRw9tgZc42zull48elcHcxR2QZk1iTVy8OiJxpwSV_GnDdSV/exec";
 
-const MONTHS = {
+// MONTHS es ahora solo el catálogo de RESPALDO (fallback), usado si nunca se ha
+// sincronizado el config desde Sheets o si falla la conexión. La fuente de verdad
+// real es la hoja "config_chars" / "config_capsules" / "config_months" del Sheet,
+// leída por syncConfig() y cacheada en localStorage bajo CONFIG_STORAGE_KEY.
+let MONTHS = {
   "2026-05": {
     name: "Mayo 2026",
     endDate: "2026-05-31",
@@ -322,6 +328,63 @@ function migrateOldDate(dateStr) {
   return Date.now();
 }
 
+// Se corre después de cargar/bajar/sincronizar estado o config, para que
+// state.chars y state.capsules siempre reflejen lo que hay en MONTHS actual
+// (sin importar si MONTHS viene del fallback hardcodeado o de Sheets vía syncConfig).
+function ensureCharsAndCapsulesExist(target) {
+  const allDefs = [];
+  Object.values(MONTHS).forEach(m => m.chars.forEach(c => allDefs.push(c)));
+  if (!target.chars) target.chars = [];
+  allDefs.forEach(def => {
+    const existing = target.chars.find(c => c.id === def.id);
+    if (!existing) {
+      target.chars.push(JSON.parse(JSON.stringify(def)));
+    }
+  });
+  // Migraciones de nombre heredadas (para estados ya guardados con nombres viejos).
+  // Personajes agregados vía config de Sheets ya no necesitan esto: se corrige
+  // el nombre directo en la hoja config_chars.
+  const dapperMickey = target.chars.find(c => c.id === "fancyhat_mickey");
+  if (dapperMickey && dapperMickey.name !== "Dapper Hat Mickey") dapperMickey.name = "Dapper Hat Mickey";
+  const formalBeast = target.chars.find(c => c.id === "formal_beast");
+  if (formalBeast && formalBeast.name !== "Formal Suit Beast") formalBeast.name = "Formal Suit Beast";
+  const coronationElsa = target.chars.find(c => c.id === "coronation_elsa");
+  if (coronationElsa && coronationElsa.name !== "Coronation Day Elsa") coronationElsa.name = "Coronation Day Elsa";
+  // Ensure capsules exist; clamp values to valid range [0, cap.total]
+  if (!target.capsules) target.capsules = buildInitialCapsules();
+  Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
+    const v = target.capsules[c.id];
+    if (v === undefined || v < 0 || v > c.total) target.capsules[c.id] = c.total;
+  }));
+  if (!target.archivedStats) target.archivedStats = { totalGained: 0, days: 0 };
+}
+
+function loadConfigLocal() {
+  try {
+    const saved = localStorage.getItem(CONFIG_STORAGE_KEY);
+    if (saved) MONTHS = JSON.parse(saved);
+  } catch(e) {}
+}
+
+async function syncConfig(silent) {
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + "?action=read_config");
+    const json = await res.json();
+    if (json.ok && json.months && Object.keys(json.months).length > 0) {
+      MONTHS = json.months;
+      localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(MONTHS));
+      ensureCharsAndCapsulesExist(state);
+      saveLocal();
+      render();
+      if (!silent) setSyncMsg("⚙️ Catálogo actualizado", "#7fbfff");
+    } else if (!silent) {
+      setSyncMsg("✗ Sin catálogo en Sheets todavía", "#ff6b6b");
+    }
+  } catch(e) {
+    if (!silent) setSyncMsg("✗ " + e.message, "#ff6b6b");
+  }
+}
+
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -334,29 +397,7 @@ function loadState() {
         });
         parsed.log.sort((a, b) => a.ts - b.ts);
       }
-      // Ensure all chars exist (add new month chars if missing)
-      const allDefs = [];
-      Object.values(MONTHS).forEach(m => m.chars.forEach(c => allDefs.push(c)));
-      if (!parsed.chars) parsed.chars = [];
-      allDefs.forEach(def => {
-        if (!parsed.chars.find(c => c.id === def.id)) {
-          parsed.chars.push(JSON.parse(JSON.stringify(def)));
-        }
-      });
-      // Migración de nombre: fancyhat_mickey -> Dapper Hat Mickey
-      const dapperMickey = parsed.chars.find(c => c.id === "fancyhat_mickey");
-      if (dapperMickey && dapperMickey.name !== "Dapper Hat Mickey") dapperMickey.name = "Dapper Hat Mickey";
-      const formalBeast = parsed.chars.find(c => c.id === "formal_beast");
-      if (formalBeast && formalBeast.name !== "Formal Suit Beast") formalBeast.name = "Formal Suit Beast";
-      const coronationElsa = parsed.chars.find(c => c.id === "coronation_elsa");
-      if (coronationElsa && coronationElsa.name !== "Coronation Day Elsa") coronationElsa.name = "Coronation Day Elsa";
-      // Ensure capsules exist; clamp values to valid range [0, cap.total]
-      if (!parsed.capsules) parsed.capsules = buildInitialCapsules();
-      Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
-        const v = parsed.capsules[c.id];
-        if (v === undefined || v < 0 || v > c.total) parsed.capsules[c.id] = c.total;
-      }));
-      if (!parsed.archivedStats) parsed.archivedStats = { totalGained: 0, days: 0 };
+      ensureCharsAndCapsulesExist(parsed);
       state = parsed;
     }
   } catch(e) {}
@@ -596,25 +637,7 @@ async function syncDown() {
     const json = await res.json();
     if (json.ok && json.data) {
       state = json.data;
-      // Ensure capsules exist; clamp values to valid range [0, cap.total]
-      if (!state.capsules) state.capsules = buildInitialCapsules();
-      Object.values(MONTHS).forEach(m => m.capsulesDef.forEach(c => {
-        const v = state.capsules[c.id];
-        if (v === undefined || v < 0 || v > c.total) state.capsules[c.id] = c.total;
-      }));
-      if (!state.archivedStats) state.archivedStats = { totalGained: 0, days: 0 };
-      // Ensure June chars exist
-      Object.values(MONTHS).forEach(m => m.chars.forEach(def => {
-        if (!state.chars.find(c => c.id === def.id))
-          state.chars.push(JSON.parse(JSON.stringify(def)));
-      }));
-      // Migración de nombre: fancyhat_mickey -> Dapper Hat Mickey
-      const dapperMickeyDown = state.chars.find(c => c.id === "fancyhat_mickey");
-      if (dapperMickeyDown && dapperMickeyDown.name !== "Dapper Hat Mickey") dapperMickeyDown.name = "Dapper Hat Mickey";
-      const formalBeastDown = state.chars.find(c => c.id === "formal_beast");
-      if (formalBeastDown && formalBeastDown.name !== "Formal Suit Beast") formalBeastDown.name = "Formal Suit Beast";
-      const coronationElsaDown = state.chars.find(c => c.id === "coronation_elsa");
-      if (coronationElsaDown && coronationElsaDown.name !== "Coronation Day Elsa") coronationElsaDown.name = "Coronation Day Elsa";
+      ensureCharsAndCapsulesExist(state);
       saveLocal(); render();
       setSyncMsg("⬇️ Datos bajados de Sheets", "#7fbfff");
     } else setSyncMsg("✗ Sin datos en Sheets", "#ff6b6b");
@@ -785,8 +808,10 @@ function render() {
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────────
+loadConfigLocal(); // usa el último catálogo sincronizado de Sheets, si existe
 loadState();
 render();
+syncConfig(true); // refresco silencioso en segundo plano; si falla, se queda con el caché/fallback
 </script>
 </body>
 </html>
