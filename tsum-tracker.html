@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -111,13 +111,13 @@
 <div class="header">
   <div class="header-left">
     <div class="label">Tsum Tsum Tracker</div>
-    <div class="days">Termina en <span id="daysLeft">—</span> días</div>
+    <div class="days">Ends in <span id="daysLeft">—</span> days</div>
   </div>
   <div>
     <div class="sync-row">
-      <button class="sync-up" id="syncUpBtn" onclick="sync()">☁️ Subir</button>
-      <button class="sync-down" id="syncDownBtn" onclick="syncDown()">⬇️ Bajar</button>
-      <button class="sync-down" id="configBtn" onclick="syncConfig(false)">⚙️ Catálogo</button>
+      <button class="sync-up" id="syncUpBtn" onclick="sync()">☁️ Upload</button>
+      <button class="sync-down" id="syncDownBtn" onclick="syncDown()">⬇️ Download</button>
+      <button class="sync-down" id="configBtn" onclick="syncConfig(false)">⚙️ Catalog</button>
     </div>
     <div class="save-msg" id="saveMsg"></div>
   </div>
@@ -125,30 +125,30 @@
 
 <div class="tabs">
   <button class="tab active" onclick="showTab('dashboard',this)">Dashboard</button>
-  <button class="tab" onclick="showTab('avance',this)">Avance</button>
-  <button class="tab" onclick="showTab('historial',this)">Historial</button>
+  <button class="tab" onclick="showTab('avance',this)">Progress</button>
+  <button class="tab" onclick="showTab('historial',this)">History</button>
 </div>
 
 <!-- DASHBOARD -->
 <div id="tab-dashboard" class="content">
   <div class="card">
-    <div class="card-label">Registrar Saldo</div>
+    <div class="card-label">Log Balance</div>
     <input type="text" inputmode="numeric" class="coins-input" id="coinInput" value="468,000" oninput="formatCoinInput(this)">
-    <button class="apply-btn" onclick="applyAndLog()" style="margin-top:8px">✓ Registrar</button>
-    <div class="coins-sub" id="coinsSub">468,000 monedas</div>
+    <button class="apply-btn" onclick="applyAndLog()" style="margin-top:8px">✓ Log</button>
+    <div class="coins-sub" id="coinsSub">468,000 coins</div>
   </div>
   <div class="stat-row">
-    <div class="stat-box"><div class="stat-label">Faltan</div><div class="stat-value" id="statFaltan" style="color:#ff6b6b">—</div><div class="stat-sub" id="statFaltanSub">— cajas</div></div>
-    <div class="stat-box"><div class="stat-label">Prom/día</div><div class="stat-value" id="statProm" style="color:#f5c518">—</div><div class="stat-sub" id="statPromSub">— días</div></div>
-    <div class="stat-box"><div class="stat-label">Proyect.</div><div class="stat-value" id="statProyect" style="color:#ff8c42">—</div><div class="stat-sub" id="statProyectSub">— días</div></div>
+    <div class="stat-box"><div class="stat-label">Needed</div><div class="stat-value" id="statFaltan" style="color:#ff6b6b">—</div><div class="stat-sub" id="statFaltanSub">— boxes</div></div>
+    <div class="stat-box"><div class="stat-label">Avg/day</div><div class="stat-value" id="statProm" style="color:#f5c518">—</div><div class="stat-sub" id="statPromSub">— days</div></div>
+    <div class="stat-box"><div class="stat-label">Projected</div><div class="stat-value" id="statProyect" style="color:#ff8c42">—</div><div class="stat-sub" id="statProyectSub">— days</div></div>
   </div>
   <div class="stat-row">
-    <div class="stat-box"><div class="stat-label">Hoy</div><div class="stat-value" id="statHoy" style="color:#4dff91">—</div><div class="stat-sub">ganado hoy</div></div>
-    <div class="stat-box"><div class="stat-label">Total mes</div><div class="stat-value" id="statMes" style="color:#4dd0e1">—</div><div class="stat-sub">desde inicio</div></div>
+    <div class="stat-box"><div class="stat-label">Today</div><div class="stat-value" id="statHoy" style="color:#4dff91">—</div><div class="stat-sub">gained today</div></div>
+    <div class="stat-box"><div class="stat-label">Month total</div><div class="stat-value" id="statMes" style="color:#4dd0e1">—</div><div class="stat-sub">since start</div></div>
   </div>
   <div class="track-box bad" id="trackBox">
     <div class="track-icon" id="trackIcon">🔴</div>
-    <div class="track-title" id="trackTitle">Por debajo del objetivo</div>
+    <div class="track-title" id="trackTitle">Below target</div>
     <div class="track-sub" id="trackSub">—</div>
   </div>
   <div class="card">
@@ -158,19 +158,19 @@
       <div class="ticket-count" id="ticketCount">0</div>
       <button class="ticket-btn" onclick="changeTickets(1)">+</button>
     </div>
-    <div class="ticket-sub" id="ticketSub">≈ 0 monedas</div>
+    <div class="ticket-sub" id="ticketSub">≈ 0 coins</div>
   </div>
 </div>
 
 <!-- AVANCE -->
 <div id="tab-avance" class="content hidden">
-  <div style="font-size:11px;color:#666">Actualiza el % · al llegar a 100 el skill sube solo</div>
+  <div style="font-size:11px;color:#666">Update the % — hitting 100 levels up the skill automatically</div>
   <div id="charCards"></div>
   <div class="total-card">
-    <div class="card-label">Tsums del mes faltantes</div>
+    <div class="card-label">Tsums remaining this month</div>
     <div class="total-row">
-      <div class="total-item"><div class="total-item-label">Tsums faltantes</div><div class="total-item-value" id="totalDups" style="color:#f5c518">—</div></div>
-      <div class="total-item"><div class="total-item-label">Monedas</div><div class="total-item-value" id="totalCoins" style="color:#ff8c42;font-size:18px">—</div></div>
+      <div class="total-item"><div class="total-item-label">Tsums remaining</div><div class="total-item-value" id="totalDups" style="color:#f5c518">—</div></div>
+      <div class="total-item"><div class="total-item-label">Coins</div><div class="total-item-value" id="totalCoins" style="color:#ff8c42;font-size:18px">—</div></div>
     </div>
   </div>
   <div id="capsuleSection"></div>
@@ -179,8 +179,8 @@
 <!-- HISTORIAL -->
 <div id="tab-historial" class="content hidden">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-    <div style="font-size:11px;color:#666" id="histCount">0 registros</div>
-    <button class="sync-down" style="font-size:10px;padding:6px 10px" onclick="archivePastMonths()">📦 Archivar mes anterior</button>
+    <div style="font-size:11px;color:#666" id="histCount">0 entries</div>
+    <button class="sync-down" style="font-size:10px;padding:6px 10px" onclick="archivePastMonths()">📦 Archive previous month</button>
   </div>
   <div id="histList" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
 </div>
@@ -197,7 +197,7 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznMEKIiCMjSSCP
 // leída por syncConfig() y cacheada en localStorage bajo CONFIG_STORAGE_KEY.
 let MONTHS = {
   "2026-05": {
-    name: "Mayo 2026",
+    name: "May 2026",
     endDate: "2026-05-31",
     capsules: 2, premiumTicketsPerCapsule: 6, capsuleCost: 450000,
     selectBoxes: 4, selectBoxBudget: 360000,
@@ -213,7 +213,7 @@ let MONTHS = {
     ],
   },
   "2026-06": {
-    name: "Junio 2026",
+    name: "June 2026",
     endDate: "2026-06-30",
     capsules: 2, premiumTicketsPerCapsule: 6, capsuleCost: 450000,
     selectBoxes: 4, selectBoxBudget: 360000,
@@ -228,7 +228,7 @@ let MONTHS = {
     ],
   },
   "2026-07": {
-    name: "Julio 2026",
+    name: "July 2026",
     endDate: "2026-07-31",
     capsules: 2, premiumTicketsPerCapsule: 6, capsuleCost: 450000,
     selectBoxes: 4, selectBoxBudget: 360000,
@@ -274,7 +274,7 @@ function getCharGroups() {
     const isActive = k === active;
     const isFuture = k > active;
     if (isFuture) return;
-    if (!isActive) return; // No mostrar meses anteriores
+    if (!isActive) return; // Don't show previous months
     const chars = (state.chars || []).filter(c => MONTHS[k].chars.find(d => d.id === c.id));
     if (!isActive && chars.length === 0) return;
     groups.push({ key: k, label: MONTHS[k].name, isActive, chars });
@@ -283,10 +283,10 @@ function getCharGroups() {
 }
 
 const INITIAL_LOG = [
-  { ts: new Date("2026-05-22T14:00:00").getTime(), coins:75111,  note:"Inicio" },
+  { ts: new Date("2026-05-22T14:00:00").getTime(), coins:75111,  note:"Start" },
   { ts: new Date("2026-05-23T20:00:00").getTime(), coins:127000, note:"" },
-  { ts: new Date("2026-05-24T09:00:00").getTime(), coins:560000, note:"Día fuerte +Coin" },
-  { ts: new Date("2026-05-24T18:00:00").getTime(), coins:375000, note:"Cajas abiertas" },
+  { ts: new Date("2026-05-24T09:00:00").getTime(), coins:560000, note:"Strong day +Coin" },
+  { ts: new Date("2026-05-24T18:00:00").getTime(), coins:375000, note:"Boxes opened" },
   { ts: new Date("2026-05-24T22:00:00").getTime(), coins:468000, note:"" },
 ];
 
@@ -368,11 +368,25 @@ function ensureCharsAndCapsulesExist(target) {
   if (!target.archivedStats) target.archivedStats = { totalGained: 0, days: 0 };
 }
 
+// This English build shares the same Apps Script backend as the Spanish version,
+// which generates month display names in Spanish (e.g. "Agosto 2026"). Rather than
+// trusting cfg.name from the server, this override regenerates it in English from
+// the month key itself, so this build stays 100% English regardless of the backend.
+const MONTH_NAMES_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+function overrideMonthNamesEnglish() {
+  Object.keys(MONTHS).forEach(key => {
+    const [year, monthNum] = key.split("-");
+    const idx = parseInt(monthNum, 10) - 1;
+    if (MONTH_NAMES_EN[idx]) MONTHS[key].name = `${MONTH_NAMES_EN[idx]} ${year}`;
+  });
+}
+
 function loadConfigLocal() {
   try {
     const saved = localStorage.getItem(CONFIG_STORAGE_KEY);
     if (saved) MONTHS = JSON.parse(saved);
   } catch(e) {}
+  overrideMonthNamesEnglish();
 }
 
 async function syncConfig(silent) {
@@ -381,13 +395,14 @@ async function syncConfig(silent) {
     const json = await res.json();
     if (json.ok && json.months && Object.keys(json.months).length > 0) {
       MONTHS = json.months;
+      overrideMonthNamesEnglish();
       localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(MONTHS));
       ensureCharsAndCapsulesExist(state);
       saveLocal();
       render();
-      if (!silent) setSyncMsg("⚙️ Catálogo actualizado", "#7fbfff");
+      if (!silent) setSyncMsg("⚙️ Catalog updated", "#7fbfff");
     } else if (!silent) {
-      setSyncMsg("✗ Sin catálogo en Sheets todavía", "#ff6b6b");
+      setSyncMsg("✗ No catalog in Sheets yet", "#ff6b6b");
     }
   } catch(e) {
     if (!silent) setSyncMsg("✗ " + e.message, "#ff6b6b");
@@ -418,7 +433,7 @@ function saveLocal() {
 // ── Date helpers ───────────────────────────────────────────────────────────────
 function fmtDate(ts) {
   const d = new Date(ts);
-  const days = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   const h = d.getHours().toString().padStart(2,"0");
   const m = d.getMinutes().toString().padStart(2,"0");
   return `${days[d.getDay()]} ${d.getDate()} ${h}:${m}`;
@@ -457,14 +472,6 @@ function totalCoinsNeeded() {
 function daysLeft() {
   const cfg = getMonthConfig();
   return Math.max(0, Math.ceil((new Date(cfg.endDate + "T23:59:59") - new Date()) / 86400000));
-}
-function currentMonthLogs() {
-  const mk = activeMonthKey(); // e.g. "2026-06"
-  const [y, m] = mk.split("-").map(Number);
-  return state.log.filter(e => {
-    const d = new Date(e.ts);
-    return d.getFullYear() === y && (d.getMonth() + 1) === m;
-  });
 }
 function rolling30Stats() {
   // Numerador: suma de deltas positivos por día (igual que antes).
@@ -517,7 +524,7 @@ function archivePastMonths() {
     // para no quitarle datos a la ventana del promedio rolling.
     if (mk < active && sorted[i].ts < cutoff) lastOldIdx = i;
   }
-  if (lastOldIdx <= 0) { setSyncMsg("No hay registros de meses anteriores con más de 30 días", "#aaa"); return; }
+  if (lastOldIdx <= 0) { setSyncMsg("No previous-month entries older than 30 days", "#aaa"); return; }
   const byDay = {};
   for (let i = 1; i <= lastOldIdx; i++) {
     const k = dayKey(sorted[i].ts);
@@ -533,7 +540,7 @@ function archivePastMonths() {
   state.log = sorted.slice(lastOldIdx);
   saveLocal();
   render();
-  setSyncMsg(`📦 ${removedCount} registros archivados`, "#7fbfff");
+  setSyncMsg(`📦 ${removedCount} entries archived`, "#7fbfff");
 }
 function coinsGainedToday() {
   const tk = todayKey();
@@ -553,16 +560,31 @@ function coinsGainedToday() {
   return gained;
 }
 function totalCoinsGainedMonth() {
-  const logs = currentMonthLogs();
-  if (logs.length < 2) return 0;
+  // Same anchor pattern as coinsGainedToday()/rolling30Stats(): use the last
+  // log entry before the active month started purely to compute the delta
+  // for the month's FIRST entry, so that first gain isn't dropped for lack
+  // of something to compare it against within the month.
+  const mk = activeMonthKey();
+  const [y, m] = mk.split("-").map(Number);
+  const sorted = [...state.log].sort((a,b) => a.ts - b.ts);
+  const inMonth = sorted.filter(e => {
+    const d = new Date(e.ts);
+    return d.getFullYear() === y && (d.getMonth() + 1) === m;
+  });
+  if (inMonth.length === 0) return 0;
+  const firstTs = inMonth[0].ts;
+  const before = sorted.filter(e => e.ts < firstTs);
+  const anchor = before.length > 0 ? before[before.length - 1] : null;
+  const combined = anchor ? [anchor, ...inMonth] : inMonth;
+  if (combined.length < 2) return 0;
   let total = 0;
-  for (let i = 1; i < logs.length; i++) {
-    const delta = logs[i].coins - logs[i-1].coins;
+  for (let i = 1; i < combined.length; i++) {
+    const delta = combined[i].coins - combined[i-1].coins;
     if (delta > 0) total += delta;
   }
   return total;
 }
-function fmt(n) { return n > 999999 ? (n/1000000).toFixed(1)+"M" : n.toLocaleString("es-MX"); }
+function fmt(n) { return n > 999999 ? (n/1000000).toFixed(1)+"M" : n.toLocaleString("en-US"); }
 
 // ── Tabs ───────────────────────────────────────────────────────────────────────
 function showTab(name, btn) {
@@ -577,7 +599,7 @@ function showTab(name, btn) {
 function formatCoinInput(el) {
   const raw = el.value.replace(/,/g, "");
   const num = parseInt(raw);
-  if (!isNaN(num)) el.value = num.toLocaleString("es-MX");
+  if (!isNaN(num)) el.value = num.toLocaleString("en-US");
 }
 function getCoinInputValue() {
   const raw = document.getElementById("coinInput").value.replace(/,/g, "").trim();
@@ -625,7 +647,7 @@ function setSyncBtns(disabled) {
 }
 async function sync() {
   setSyncBtns(true);
-  setSyncMsg("⏳ Subiendo...", "#aaa");
+  setSyncMsg("⏳ Uploading...", "#aaa");
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
@@ -633,14 +655,14 @@ async function sync() {
       body: JSON.stringify({ action: "write", data: state }),
     });
     const json = await res.json();
-    if (json.ok) { saveLocal(); setSyncMsg("☁️ Guardado en Sheets", "#7fff7f"); }
+    if (json.ok) { saveLocal(); setSyncMsg("☁️ Saved to Sheets", "#7fff7f"); }
     else setSyncMsg("✗ Error: " + json.error, "#ff6b6b");
   } catch(e) { setSyncMsg("✗ " + e.message, "#ff6b6b"); }
   finally { setSyncBtns(false); }
 }
 async function syncDown() {
   setSyncBtns(true);
-  setSyncMsg("⏳ Bajando...", "#aaa");
+  setSyncMsg("⏳ Downloading...", "#aaa");
   try {
     const res = await fetch(APPS_SCRIPT_URL);
     const json = await res.json();
@@ -648,8 +670,8 @@ async function syncDown() {
       state = json.data;
       ensureCharsAndCapsulesExist(state);
       saveLocal(); render();
-      setSyncMsg("⬇️ Datos bajados de Sheets", "#7fbfff");
-    } else setSyncMsg("✗ Sin datos en Sheets", "#ff6b6b");
+      setSyncMsg("⬇️ Data downloaded from Sheets", "#7fbfff");
+    } else setSyncMsg("✗ No data in Sheets", "#ff6b6b");
   } catch(e) { setSyncMsg("✗ " + e.message, "#ff6b6b"); }
   finally { setSyncBtns(false); }
 }
@@ -674,28 +696,28 @@ function render() {
   const mes = totalCoinsGainedMonth();
 
   document.getElementById("daysLeft").textContent = days;
-  document.getElementById("coinInput").value = state.coins.toLocaleString("es-MX");
+  document.getElementById("coinInput").value = state.coins.toLocaleString("en-US");
   document.getElementById("statFaltan").textContent = fmt(falta);
   document.getElementById("statFaltan").style.color = falta === 0 ? "#7fff7f" : "#ff6b6b";
   document.getElementById("statFaltanSub").textContent = capsReq > 0
-    ? `${fmt(charsReq)} Dups + ${fmt(capsReq)} caps${ticketsApplied > 0 ? ` − ${fmt(ticketsApplied)} tickets` : ""}`
-    : Math.ceil(falta/30000) + " cajas";
+    ? `Target ${fmt(effectiveReq)} − Balance ${fmt(state.coins)}`
+    : Math.ceil(falta/30000) + " boxes";
   document.getElementById("statProm").textContent = avg > 0 ? fmt(avg) : "—";
-  document.getElementById("statPromSub").textContent = uniqueDays + " días";
+  document.getElementById("statPromSub").textContent = uniqueDays + " days";
   document.getElementById("statProyect").textContent = fmt(proj);
   document.getElementById("statProyect").style.color = onTrack ? "#7fff7f" : "#ff8c42";
-  document.getElementById("statProyectSub").textContent = days + " días";
+  document.getElementById("statProyectSub").textContent = days + " days";
   document.getElementById("statHoy").textContent = hoy > 0 ? fmt(hoy) : "—";
   document.getElementById("statMes").textContent = mes > 0 ? fmt(mes) : "—";
   document.getElementById("trackBox").className = "track-box " + (onTrack ? "good" : "bad");
   document.getElementById("trackIcon").textContent = onTrack ? "🟢" : "🔴";
-  document.getElementById("trackTitle").textContent = onTrack ? "¡En camino!" : "Por debajo del objetivo";
+  document.getElementById("trackTitle").textContent = onTrack ? "On track!" : "Below target";
   document.getElementById("trackTitle").style.color = onTrack ? "#7fff7f" : "#ff6b6b";
-  const diff = proj - coinsReq;
+  const breakdown = `${fmt(charsReq)} Dupes + ${fmt(capsReq)} caps${ticketsApplied > 0 ? ` − ${fmt(ticketsApplied)} tickets` : ""}`;
   document.getElementById("trackSub").textContent =
-    `Necesitas ${effectiveReq.toLocaleString("es-MX")} · Proyectado ${fmt(proj)} (avg×días + saldo)`;
+    `Target ${effectiveReq.toLocaleString("en-US")} (${breakdown}) · Projected ${fmt(proj)} (avg×days + balance)`;
   document.getElementById("ticketCount").textContent = state.premiumTickets;
-  document.getElementById("ticketSub").textContent = "≈ " + (state.premiumTickets * 30000).toLocaleString("es-MX") + " monedas";
+  document.getElementById("ticketSub").textContent = "≈ " + (state.premiumTickets * 30000).toLocaleString("en-US") + " coins";
 
   // ── Avance: personajes por mes ─────────────────────────────────────────────
   const charContainer = document.getElementById("charCards");
@@ -706,7 +728,7 @@ function render() {
   groups.forEach(group => {
     const sectionTitle = document.createElement("div");
     sectionTitle.className = "month-section-title" + (group.isActive ? "" : " archived");
-    sectionTitle.textContent = group.isActive ? `▸ ${group.label}` : `▾ ${group.label} (archivado)`;
+    sectionTitle.textContent = group.isActive ? `▸ ${group.label}` : `▾ ${group.label} (archived)`;
     charContainer.appendChild(sectionTitle);
 
     group.chars.forEach(c => {
@@ -728,15 +750,15 @@ function render() {
 
       div.innerHTML = `
         ${isMax ? '<div class="char-max-badge">MAX ✓</div>' : ''}
-        ${isArchived ? '<div class="char-archived-badge">Archivado</div>' : ''}
+        ${isArchived ? '<div class="char-archived-badge">Archived</div>' : ''}
         <div class="char-name">${c.name}</div>
         ${barHTML}
         <div class="char-stats">
-          <div class="char-stat"><div class="char-stat-label">Dups restantes</div><div class="char-stat-value" style="color:${isMax?"#7fff7f":"#f5c518"}">${dups}</div></div>
-          <div class="char-stat"><div class="char-stat-label">Monedas</div><div class="char-stat-value" style="color:${isMax?"#7fff7f":"#ff8c42"};font-size:14px">${(dups*30000).toLocaleString("es-MX")}</div></div>
+          <div class="char-stat"><div class="char-stat-label">Dupes left</div><div class="char-stat-value" style="color:${isMax?"#7fff7f":"#f5c518"}">${dups}</div></div>
+          <div class="char-stat"><div class="char-stat-label">Coins</div><div class="char-stat-value" style="color:${isMax?"#7fff7f":"#ff8c42"};font-size:14px">${(dups*30000).toLocaleString("en-US")}</div></div>
         </div>
         ${(!isMax && !isArchived) ? `<div class="char-controls">
-          <label>Barra %:</label>
+          <label>Bar %:</label>
           <input type="text" inputmode="numeric" class="char-pct-input" value="${c.skillPct}" onchange="updateCharPct('${c.id}',this.value)" placeholder="0–99">
         </div>` : ''}
       `;
@@ -745,7 +767,7 @@ function render() {
   });
 
   document.getElementById("totalDups").textContent = totalDups;
-  document.getElementById("totalCoins").textContent = (totalDups * 30000).toLocaleString("es-MX");
+  document.getElementById("totalCoins").textContent = (totalDups * 30000).toLocaleString("en-US");
 
   // ── Cápsulas ───────────────────────────────────────────────────────────────
   const capSection = document.getElementById("capsuleSection");
@@ -776,11 +798,11 @@ function render() {
         <div class="capsule-btns">
           <button class="cap-btn" onclick="changeCapsule('${cap.id}',1)">−</button>
           <button class="cap-btn" onclick="changeCapsule('${cap.id}',-1)">+</button>
-          <span style="font-size:10px;color:#4a7aaa;margin-left:6px">${bought} comprados</span>
+          <span style="font-size:10px;color:#4a7aaa;margin-left:6px">${bought} bought</span>
         </div>
         ${complete
-          ? '<div class="capsule-reward">🎫 Skill Ticket obtenido</div>'
-          : `<div style="font-size:11px;color:#4a7aaa;margin-top:6px">Faltan ${remaining} Tsums · <span style="color:#ff8c42;font-weight:700">${capCoinsNeeded.toLocaleString("es-MX")} monedas</span></div>`}
+          ? '<div class="capsule-reward">🎫 Skill Ticket earned</div>'
+          : `<div style="font-size:11px;color:#4a7aaa;margin-top:6px">${remaining} Tsums left · <span style="color:#ff8c42;font-weight:700">${capCoinsNeeded.toLocaleString("en-US")} coins</span></div>`}
       `;
       capSection.appendChild(div);
     });
@@ -794,7 +816,7 @@ function render() {
     .map((e, idx) => ({ ...e, _idx: idx }))
     .filter(e => e.ts >= cutoffTs);
   document.getElementById("histCount").textContent =
-    `${recentEntries.length} de últimos 3 días · ${state.log.length} en total`;
+    `${recentEntries.length} of last 3 days · ${state.log.length} total`;
   [...recentEntries].reverse().forEach(e => {
     const idx = e._idx;
     const prev = idx > 0 ? state.log[idx-1] : null;
@@ -807,8 +829,8 @@ function render() {
         ${e.note ? `<div class="hist-note">${e.note}</div>` : ""}
       </div>
       <div class="hist-right">
-        <div class="hist-coins">${e.coins.toLocaleString("es-MX")}</div>
-        ${delta !== null ? `<div class="hist-delta" style="color:${delta>=0?"#7fff7f":"#ff6b6b"}">${delta>=0?"+":""}${delta.toLocaleString("es-MX")}</div>` : ""}
+        <div class="hist-coins">${e.coins.toLocaleString("en-US")}</div>
+        ${delta !== null ? `<div class="hist-delta" style="color:${delta>=0?"#7fff7f":"#ff6b6b"}">${delta>=0?"+":""}${delta.toLocaleString("en-US")}</div>` : ""}
       </div>
       <button class="del-btn" onclick="deleteLog(${idx})">✕</button>
     `;
