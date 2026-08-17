@@ -585,6 +585,9 @@ function totalCoinsGainedMonth() {
   return total;
 }
 function fmt(n) { return n > 999999 ? (n/1000000).toFixed(1)+"M" : n.toLocaleString("en-US"); }
+// Two-decimal variant used for Needed/Projected stat cards, where a single decimal
+// can round two genuinely different values (e.g. 2.51M vs 2.52M) to the same "2.5M".
+function fmt2(n) { return n > 999999 ? (n/1000000).toFixed(2)+"M" : n.toLocaleString("en-US"); }
 
 // ── Tabs ───────────────────────────────────────────────────────────────────────
 function showTab(name, btn) {
@@ -697,14 +700,14 @@ function render() {
 
   document.getElementById("daysLeft").textContent = days;
   document.getElementById("coinInput").value = state.coins.toLocaleString("en-US");
-  document.getElementById("statFaltan").textContent = fmt(falta);
+  document.getElementById("statFaltan").textContent = fmt2(falta);
   document.getElementById("statFaltan").style.color = falta === 0 ? "#7fff7f" : "#ff6b6b";
   document.getElementById("statFaltanSub").textContent = capsReq > 0
     ? `Target ${fmt(effectiveReq)} − Balance ${fmt(state.coins)}`
-    : Math.ceil(falta/30000) + " boxes";
+    : "";
   document.getElementById("statProm").textContent = avg > 0 ? fmt(avg) : "—";
   document.getElementById("statPromSub").textContent = uniqueDays + " days";
-  document.getElementById("statProyect").textContent = fmt(proj);
+  document.getElementById("statProyect").textContent = fmt2(proj);
   document.getElementById("statProyect").style.color = onTrack ? "#7fff7f" : "#ff8c42";
   document.getElementById("statProyectSub").textContent = days + " days";
   document.getElementById("statHoy").textContent = hoy > 0 ? fmt(hoy) : "—";
@@ -715,7 +718,7 @@ function render() {
   document.getElementById("trackTitle").style.color = onTrack ? "#7fff7f" : "#ff6b6b";
   const breakdown = `${fmt(charsReq)} Dupes + ${fmt(capsReq)} caps${ticketsApplied > 0 ? ` − ${fmt(ticketsApplied)} tickets` : ""}`;
   document.getElementById("trackSub").textContent =
-    `Target ${effectiveReq.toLocaleString("en-US")} (${breakdown}) · Projected ${fmt(proj)} (avg×days + balance)`;
+    `Target ${effectiveReq.toLocaleString("en-US")} (${breakdown}) · Projected ${proj.toLocaleString("en-US")} (avg×days + balance)`;
   document.getElementById("ticketCount").textContent = state.premiumTickets;
   document.getElementById("ticketSub").textContent = "≈ " + (state.premiumTickets * 30000).toLocaleString("en-US") + " coins";
 
