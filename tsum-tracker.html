@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tsum Tsum Tracker</title>
+<title>Unofficial Tsum Tracker</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
@@ -45,6 +45,13 @@
   .track-icon { font-size: 20px; }
   .track-title { font-weight: 700; font-size: 14px; }
   .track-sub { font-size: 10px; color: #90b8d8; margin-top: 4px; }
+  .track-box { cursor: pointer; }
+  .track-header { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .track-chevron { font-size: 11px; color: #90b8d8; transition: transform 0.2s; }
+  .track-chevron.expanded { transform: rotate(180deg); }
+  .track-detail { font-size: 10px; color: #90b8d8; margin-top: 10px; text-align: left; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; display: flex; flex-direction: column; gap: 3px; }
+  .track-detail-row { display: flex; justify-content: space-between; }
+  .track-detail-row.total { color: #e8f4ff; font-weight: 700; border-top: 1px dashed rgba(255,255,255,0.15); margin-top: 2px; padding-top: 4px; }
   .ticket-row { display: flex; gap: 10px; align-items: center; }
   .ticket-btn { background: #1a3a6a; color: #e8f4ff; border: 1px solid #2a6abf; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; font-size: 18px; }
   .ticket-count { font-size: 28px; font-weight: 800; color: #f5c518; flex: 1; text-align: center; }
@@ -104,13 +111,14 @@
   .hist-right { text-align: right; margin-right: 10px; }
   .del-btn { background: none; border: none; color: #2a5a8a; cursor: pointer; font-size: 16px; }
   .hidden { display: none; }
+  .legal-footer { padding: 18px 20px 10px; font-size: 9px; line-height: 1.5; color: #3a5a80; text-align: center; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-left">
-    <div class="label">Tsum Tsum Tracker</div>
+    <div class="label">Unofficial Tsum Tracker</div>
     <div class="days">Ends in <span id="daysLeft">—</span> days</div>
   </div>
   <div>
@@ -137,10 +145,13 @@
     <button class="apply-btn" onclick="applyAndLog()" style="margin-top:8px">✓ Log</button>
     <div class="coins-sub" id="coinsSub">468,000 coins</div>
   </div>
-  <div class="track-box bad" id="trackBox">
-    <div class="track-icon" id="trackIcon">🔴</div>
-    <div class="track-title" id="trackTitle">Below target</div>
-    <div class="track-sub" id="trackSub">—</div>
+  <div class="track-box bad" id="trackBox" onclick="toggleTrackDetail()">
+    <div class="track-header">
+      <div class="track-icon" id="trackIcon">🔴</div>
+      <div class="track-title" id="trackTitle">Below target</div>
+      <div class="track-chevron" id="trackChevron">▾</div>
+    </div>
+    <div class="track-detail hidden" id="trackDetail"></div>
   </div>
   <div class="card">
     <div class="card-label">Premium Tickets</div>
@@ -184,6 +195,10 @@
   </div>
   <div id="histList" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
 </div>
+
+<footer class="legal-footer">
+  Disclaimer: Unofficial Tsum Tracker is a fan-made project and is not affiliated with, endorsed, sponsored, or specifically approved by Disney, LINE Corporation, or any of their affiliates. All game assets, names, and character trademarks belong to their respective owners.
+</footer>
 
 <script>
 // ── Config ─────────────────────────────────────────────────────────────────────
@@ -590,6 +605,11 @@ function fmt(n) { return n > 999999 ? (n/1000000).toFixed(1)+"M" : n.toLocaleStr
 function fmt2(n) { return n > 999999 ? (n/1000000).toFixed(2)+"M" : n.toLocaleString("en-US"); }
 
 // ── Tabs ───────────────────────────────────────────────────────────────────────
+let trackDetailExpanded = false; // always starts collapsed on load; not persisted
+function toggleTrackDetail() {
+  trackDetailExpanded = !trackDetailExpanded;
+  render();
+}
 function showTab(name, btn) {
   document.querySelectorAll(".content").forEach(el => el.classList.add("hidden"));
   document.querySelectorAll(".tab").forEach(el => el.classList.remove("active"));
@@ -702,9 +722,7 @@ function render() {
   document.getElementById("coinInput").value = state.coins.toLocaleString("en-US");
   document.getElementById("statFaltan").textContent = fmt2(falta);
   document.getElementById("statFaltan").style.color = falta === 0 ? "#7fff7f" : "#ff6b6b";
-  document.getElementById("statFaltanSub").textContent = capsReq > 0
-    ? `Target ${fmt(effectiveReq)} − Balance ${fmt(state.coins)}`
-    : "";
+  document.getElementById("statFaltanSub").textContent = "";
   document.getElementById("statProm").textContent = avg > 0 ? fmt(avg) : "—";
   document.getElementById("statPromSub").textContent = uniqueDays + " days";
   document.getElementById("statProyect").textContent = fmt2(proj);
@@ -716,9 +734,21 @@ function render() {
   document.getElementById("trackIcon").textContent = onTrack ? "🟢" : "🔴";
   document.getElementById("trackTitle").textContent = onTrack ? "On track!" : "Below target";
   document.getElementById("trackTitle").style.color = onTrack ? "#7fff7f" : "#ff6b6b";
-  const breakdown = `${fmt(charsReq)} Dupes + ${fmt(capsReq)} caps${ticketsApplied > 0 ? ` − ${fmt(ticketsApplied)} tickets` : ""}`;
-  document.getElementById("trackSub").textContent =
-    `Target ${effectiveReq.toLocaleString("en-US")} (${breakdown}) · Projected ${proj.toLocaleString("en-US")} (avg×days + balance)`;
+  document.getElementById("trackChevron").classList.toggle("expanded", trackDetailExpanded);
+  document.getElementById("trackChevron").textContent = trackDetailExpanded ? "▴" : "▾";
+  const trackDetailEl = document.getElementById("trackDetail");
+  trackDetailEl.classList.toggle("hidden", !trackDetailExpanded);
+  // Needed (falta) is now the single number shown both here and in the stat card:
+  // Dupes + Capsules − Tickets applied = gross goal; minus Balance = Needed (net).
+  trackDetailEl.innerHTML = `
+    <div class="track-detail-row"><span>Dupes</span><span>${fmt(charsReq)}</span></div>
+    <div class="track-detail-row"><span>Capsules</span><span>${fmt(capsReq)}</span></div>
+    ${ticketsApplied > 0 ? `<div class="track-detail-row"><span>Tickets applied</span><span>−${fmt(ticketsApplied)}</span></div>` : ""}
+    <div class="track-detail-row"><span>Total goal</span><span>${effectiveReq.toLocaleString("en-US")}</span></div>
+    <div class="track-detail-row"><span>Balance</span><span>−${state.coins.toLocaleString("en-US")}</span></div>
+    <div class="track-detail-row total"><span>Needed</span><span>${falta.toLocaleString("en-US")}</span></div>
+    <div class="track-detail-row"><span>Projected</span><span>${proj.toLocaleString("en-US")}</span></div>
+  `;
   document.getElementById("ticketCount").textContent = state.premiumTickets;
   document.getElementById("ticketSub").textContent = "≈ " + (state.premiumTickets * 30000).toLocaleString("en-US") + " coins";
 
