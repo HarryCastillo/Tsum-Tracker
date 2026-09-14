@@ -33,6 +33,7 @@
   .apply-btn { width: 100%; background: linear-gradient(135deg,#f5a623,#e8922a); color: #1a2a4a; border: none; border-radius: 8px; padding: 10px; font-weight: 800; cursor: pointer; font-size: 15px; }
   .apply-btn:active { opacity: 0.85; }
   .coins-sub { font-size: 10px; color: #4a7aaa; margin-top: 4px; visibility: hidden; }
+  .current-balance { width: 100%; background: #071020; color: #f5c518; border: 2px solid #1a4a8a; border-radius: 8px; padding: 6px 10px; font-size: 16px; font-weight: 800; }
   .log-input { width: 100%; background: #071020; color: #e8f4ff; border: 1px solid #1a4a8a; border-radius: 8px; padding: 8px 10px; font-size: 12px; margin-top: 8px; }
   .stat-row { display: flex; gap: 8px; }
   .stat-box { background: linear-gradient(135deg,#0d2040,#112a50); border: 1px solid #1a4a8a; border-radius: 12px; padding: 12px 10px; flex: 1; }
@@ -140,10 +141,11 @@
 <!-- DASHBOARD -->
 <div id="tab-dashboard" class="content">
   <div class="card">
-    <div class="card-label">Log Balance</div>
-    <input type="text" inputmode="numeric" class="coins-input" id="coinInput" value="468,000" oninput="formatCoinInput(this)">
+    <div class="card-label">Current Balance</div>
+    <div class="current-balance" id="currentBalance">—</div>
+    <div class="card-label" style="margin-top:12px">New Balance</div>
+    <input type="text" inputmode="numeric" class="coins-input" id="coinInput" value="" placeholder="Enter new balance" oninput="formatCoinInput(this)" onblur="formatCoinInputBlur(this)">
     <button class="apply-btn" onclick="applyAndLog()" style="margin-top:8px">✓ Log</button>
-    <div class="coins-sub" id="coinsSub">468,000 coins</div>
   </div>
   <div class="track-box bad" id="trackBox" onclick="toggleTrackDetail()">
     <div class="track-header">
@@ -620,9 +622,13 @@ function showTab(name, btn) {
 
 // ── Actions ────────────────────────────────────────────────────────────────────
 function formatCoinInput(el) {
-  const raw = el.value.replace(/,/g, "");
-  const num = parseInt(raw);
-  if (!isNaN(num)) el.value = num.toLocaleString("en-US");
+  // Only strip non-digits while typing — no comma insertion here, so the
+  // cursor never jumps mid-edit on mobile. Commas are added on blur instead.
+  el.value = el.value.replace(/[^\d]/g, "");
+}
+function formatCoinInputBlur(el) {
+  const num = parseInt(el.value.replace(/,/g, ""));
+  el.value = isNaN(num) ? "" : num.toLocaleString("en-US");
 }
 function getCoinInputValue() {
   const raw = document.getElementById("coinInput").value.replace(/,/g, "").trim();
@@ -635,6 +641,7 @@ function applyAndLog() {
   state.coins = v;
   state.log.push({ ts: Date.now(), coins: v, note: "" });
   saveLocal();
+  document.getElementById("coinInput").value = "";
   render();
 }
 function deleteLog(idx) { state.log.splice(idx,1); saveLocal(); render(); }
@@ -719,7 +726,7 @@ function render() {
   const mes = totalCoinsGainedMonth();
 
   document.getElementById("daysLeft").textContent = days;
-  document.getElementById("coinInput").value = state.coins.toLocaleString("en-US");
+  document.getElementById("currentBalance").textContent = state.coins.toLocaleString("en-US") + " coins";
   document.getElementById("statFaltan").textContent = fmt2(falta);
   document.getElementById("statFaltan").style.color = falta === 0 ? "#7fff7f" : "#ff6b6b";
   document.getElementById("statFaltanSub").textContent = "";
