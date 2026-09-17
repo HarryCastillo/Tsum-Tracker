@@ -748,9 +748,9 @@ function render() {
   // Needed (falta) is now the single number shown both here and in the stat card:
   // Dupes + Capsules − Tickets applied = gross goal; minus Balance = Needed (net).
   trackDetailEl.innerHTML = `
-    <div class="track-detail-row"><span>Dupes</span><span>${fmt(charsReq)}</span></div>
-    <div class="track-detail-row"><span>Capsules</span><span>${fmt(capsReq)}</span></div>
-    ${ticketsApplied > 0 ? `<div class="track-detail-row"><span>Tickets applied</span><span>−${fmt(ticketsApplied)}</span></div>` : ""}
+    <div class="track-detail-row"><span>Dupes</span><span>${charsReq.toLocaleString("en-US")}</span></div>
+    <div class="track-detail-row"><span>Capsules</span><span>${capsReq.toLocaleString("en-US")}</span></div>
+    ${ticketsApplied > 0 ? `<div class="track-detail-row"><span>Tickets applied</span><span>−${ticketsApplied.toLocaleString("en-US")}</span></div>` : ""}
     <div class="track-detail-row"><span>Total goal</span><span>${effectiveReq.toLocaleString("en-US")}</span></div>
     <div class="track-detail-row"><span>Balance</span><span>−${state.coins.toLocaleString("en-US")}</span></div>
     <div class="track-detail-row total"><span>Needed</span><span>${falta.toLocaleString("en-US")}</span></div>
