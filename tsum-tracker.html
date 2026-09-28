@@ -719,11 +719,16 @@ function render() {
   const effectiveReq = (charsReq - ticketsApplied) + capsReq;
   const falta = Math.max(0, effectiveReq - state.coins);
   const avg = avgDaily();
-  const proj = state.coins + avg * days;
-  const onTrack = proj >= effectiveReq;
   const uniqueDays = avgDailyDayCount();
   const hoy = coinsGainedToday();
   const mes = totalCoinsGainedMonth();
+  // Proyección realista: días completos que faltan después de hoy (a promedio pleno)
+  // + lo que falta por ganar HOY (promedio menos lo ya ganado, sin bajar de 0),
+  // en vez de contar "hoy" como un día completo adicional sobre lo ya logrado.
+  const fullDaysAhead = Math.max(0, days - 1);
+  const restOfToday = Math.max(0, avg - hoy);
+  const proj = state.coins + restOfToday + avg * fullDaysAhead;
+  const onTrack = proj >= effectiveReq;
 
   document.getElementById("daysLeft").textContent = days;
   document.getElementById("currentBalance").textContent = state.coins.toLocaleString("en-US") + " coins";
