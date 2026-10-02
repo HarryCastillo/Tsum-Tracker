@@ -78,6 +78,9 @@
   .char-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
   .char-controls label { font-size: 10px; color: #4a7aaa; }
   .char-pct-input { background: #071020; color: #e8f4ff; border: 1px solid #2a6abf; border-radius: 6px; padding: 4px 8px; font-size: 14px; width: 70px; }
+  .char-btn { background: #1a3a6a; color: #e8f4ff; border: 1px solid #2a6abf; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; font-size: 18px; }
+  .char-btn:disabled { opacity: 0.35; cursor: default; }
+  .char-btn-group { display: flex; gap: 6px; margin-left: auto; }
   .total-card { background: linear-gradient(135deg,#0d2040,#112a50); border: 1px solid #1a4a8a; border-radius: 12px; padding: 14px; }
   .total-row { display: flex; gap: 10px; }
   .total-item { flex: 1; text-align: center; }
@@ -177,7 +180,7 @@
 
 <!-- AVANCE -->
 <div id="tab-avance" class="content hidden">
-  <div style="font-size:11px;color:#666">Update the % — hitting 100 levels up the skill automatically</div>
+  <div style="font-size:11px;color:#666">Use + / − to add or remove a dupe (levels up or down automatically), or type the %</div>
   <div id="charCards"></div>
   <div class="total-card">
     <div class="card-label">Tsums remaining this month</div>
@@ -657,6 +660,35 @@ function updateCharPct(id, val) {
   c.skillPct = Math.min(99, pct);
   saveLocal(); render();
 }
+// +1 / −1 dupe on a character. Works in whole dupes (not %), so the bar moves in
+// exact steps for that level. Reaching the level's total levels up (bar resets to 0);
+// going below 0 levels down and lands one dupe short of completing the previous
+// level. A maxed character can be stepped back down to fix a mistake; level 1 is the floor.
+function changeCharDupe(id, d) {
+  const c = state.chars.find(c => c.id === id);
+  if (!c) return;
+  let lvl = c.skillCurrent;
+  let done;
+  if (lvl >= c.skillMax) {
+    if (d > 0) return;
+    lvl = c.skillMax - 1;
+    done = c.upgrades[lvl] - 1;
+  } else {
+    const needed = c.upgrades[lvl];
+    done = Math.round((c.skillPct / 100) * needed) + d;
+    if (done >= needed) {
+      lvl += 1;
+      done = 0;
+    } else if (done < 0) {
+      if (lvl <= 1) return;
+      lvl -= 1;
+      done = c.upgrades[lvl] - 1;
+    }
+  }
+  c.skillCurrent = lvl;
+  c.skillPct = (lvl >= c.skillMax) ? 0 : Math.round((done / c.upgrades[lvl]) * 1000) / 10;
+  saveLocal(); render();
+}
 function changeCapsule(id, d) {
   const cap = Object.values(MONTHS).flatMap(m => m.capsulesDef).find(c => c.id === id);
   if (!cap) return;
@@ -802,9 +834,13 @@ function render() {
           <div class="char-stat"><div class="char-stat-label">Dupes left</div><div class="char-stat-value" style="color:${isMax?"#7fff7f":"#f5c518"}">${dups}</div></div>
           <div class="char-stat"><div class="char-stat-label">Coins</div><div class="char-stat-value" style="color:${isMax?"#7fff7f":"#ff8c42"};font-size:14px">${(dups*30000).toLocaleString("en-US")}</div></div>
         </div>
-        ${(!isMax && !isArchived) ? `<div class="char-controls">
-          <label>Bar %:</label>
-          <input type="text" inputmode="numeric" class="char-pct-input" value="${c.skillPct}" onchange="updateCharPct('${c.id}',this.value)" placeholder="0–99">
+        ${!isArchived ? `<div class="char-controls">
+          ${!isMax ? `<label>Bar %:</label>
+          <input type="text" inputmode="numeric" class="char-pct-input" value="${c.skillPct}" onchange="updateCharPct('${c.id}',this.value)" placeholder="0–99">` : ''}
+          <div class="char-btn-group">
+            <button class="char-btn" onclick="changeCharDupe('${c.id}',-1)" aria-label="Remove one dupe">−</button>
+            <button class="char-btn" onclick="changeCharDupe('${c.id}',1)" aria-label="Add one dupe" ${isMax ? 'disabled' : ''}>+</button>
+          </div>
         </div>` : ''}
       `;
       charContainer.appendChild(div);
