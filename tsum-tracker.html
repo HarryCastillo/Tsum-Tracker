@@ -759,8 +759,11 @@ function render() {
   // en vez de contar "hoy" como un día completo adicional sobre lo ya logrado.
   const fullDaysAhead = Math.max(0, days - 1);
   const restOfToday = Math.max(0, avg - hoy);
-  const proj = state.coins + restOfToday + avg * fullDaysAhead;
-  const onTrack = proj >= effectiveReq;
+  // Projected = solo lo que se proyecta GANAR de aquí al cierre (sin incluir el saldo),
+  // para que sea directamente comparable con Needed (que ya descuenta el saldo).
+  const projGain = restOfToday + avg * fullDaysAhead;
+  const surplus = projGain - falta; // positivo = sobrante, negativo = faltante
+  const onTrack = surplus >= 0;
 
   document.getElementById("daysLeft").textContent = days;
   document.getElementById("currentBalance").textContent = state.coins.toLocaleString("en-US") + " coins";
@@ -769,7 +772,7 @@ function render() {
   document.getElementById("statFaltanSub").textContent = "";
   document.getElementById("statProm").textContent = avg > 0 ? fmt(avg) : "—";
   document.getElementById("statPromSub").textContent = uniqueDays + " days";
-  document.getElementById("statProyect").textContent = fmt2(proj);
+  document.getElementById("statProyect").textContent = fmt2(projGain);
   document.getElementById("statProyect").style.color = onTrack ? "#7fff7f" : "#ff8c42";
   document.getElementById("statProyectSub").textContent = days + " days";
   document.getElementById("statHoy").textContent = hoy > 0 ? fmt(hoy) : "—";
@@ -782,8 +785,10 @@ function render() {
   document.getElementById("trackChevron").textContent = trackDetailExpanded ? "▴" : "▾";
   const trackDetailEl = document.getElementById("trackDetail");
   trackDetailEl.classList.toggle("hidden", !trackDetailExpanded);
-  // Needed (falta) is now the single number shown both here and in the stat card:
+  // Needed (falta) is the single number shown both here and in the stat card:
   // Dupes + Capsules − Tickets applied = gross goal; minus Balance = Needed (net).
+  // Projected gain is compared directly against Needed to get Surplus/Shortfall.
+  const surplusColor = onTrack ? "#7fff7f" : "#ff6b6b";
   trackDetailEl.innerHTML = `
     <div class="track-detail-row"><span>Dupes</span><span>${charsReq.toLocaleString("en-US")}</span></div>
     <div class="track-detail-row"><span>Capsules</span><span>${capsReq.toLocaleString("en-US")}</span></div>
@@ -791,7 +796,8 @@ function render() {
     <div class="track-detail-row"><span>Total goal</span><span>${effectiveReq.toLocaleString("en-US")}</span></div>
     <div class="track-detail-row"><span>Balance</span><span>−${state.coins.toLocaleString("en-US")}</span></div>
     <div class="track-detail-row total"><span>Needed</span><span>${falta.toLocaleString("en-US")}</span></div>
-    <div class="track-detail-row"><span>Projected</span><span>${proj.toLocaleString("en-US")}</span></div>
+    <div class="track-detail-row"><span>Projected gain</span><span>${Math.round(projGain).toLocaleString("en-US")}</span></div>
+    <div class="track-detail-row total" style="color:${surplusColor}"><span>${onTrack ? "Surplus" : "Shortfall"}</span><span>${onTrack ? "+" : "−"}${Math.abs(Math.round(surplus)).toLocaleString("en-US")}</span></div>
   `;
   document.getElementById("ticketCount").textContent = state.premiumTickets;
   document.getElementById("ticketSub").textContent = "≈ " + (state.premiumTickets * 30000).toLocaleString("en-US") + " coins";
