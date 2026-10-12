@@ -463,6 +463,14 @@ function dayKey(ts) {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 function todayKey() { return dayKey(Date.now()); }
+// Medianoche local de hace 30 días. Se usa como corte de la ventana rolling para que
+// el promedio (y con él el semáforo) solo cambie a las 00:00 y no a mitad del día.
+function rollingCutoffTs() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - 30);
+  return d.getTime();
+}
 
 // ── Calc ───────────────────────────────────────────────────────────────────────
 function dupsRemaining(char) {
@@ -490,8 +498,12 @@ function totalCoinsNeeded() {
   return activeChars().reduce((s,c) => s + dupsRemaining(c) * 30000, 0) + totalCapsuleCoinsNeeded();
 }
 function daysLeft() {
+  // Días calendario restantes, contando hoy (hoy → endDate inclusive). Se compara
+  // medianoche contra medianoche, así el número solo cambia a las 00:00.
   const cfg = getMonthConfig();
-  return Math.max(0, Math.ceil((new Date(cfg.endDate + "T23:59:59") - new Date()) / 86400000));
+  const endMid = new Date(cfg.endDate + "T00:00:00");
+  const todayMid = new Date(); todayMid.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.round((endMid - todayMid) / 86400000) + 1);
 }
 function rolling30Stats() {
   // Numerador: suma de deltas positivos por día (igual que antes).
@@ -499,8 +511,9 @@ function rolling30Stats() {
   // (o desde el primer registro si el tracking empezó hace menos de 30 días),
   // aunque no haya registro ese día — un día sin registrar cuenta como 0,
   // para que no se infle el promedio si te saltas un día.
+  // El corte de la ventana es medianoche (rollingCutoffTs), no la hora exacta.
   if (state.log.length === 0) return { sum: 0, days: 0 };
-  const cutoff = Date.now() - 30 * 86400000;
+  const cutoff = rollingCutoffTs();
   const sorted = [...state.log].sort((a,b) => a.ts - b.ts);
   const earliestTs = sorted[0].ts;
   let anchorIdx = -1;
@@ -534,7 +547,7 @@ function avgDailyDayCount() {
 }
 function archivePastMonths() {
   const active = activeMonthKey();
-  const cutoff = Date.now() - 30 * 86400000;
+  const cutoff = rollingCutoffTs();
   const sorted = [...state.log].sort((a,b) => a.ts - b.ts);
   let lastOldIdx = -1;
   for (let i = 0; i < sorted.length; i++) {
@@ -819,6 +832,8 @@ function render() {
       if (group.isActive) totalDups += dups;
       const isMax = c.skillCurrent >= c.skillMax;
       const isArchived = !group.isActive;
+      // Solo para mostrar: el valor interno conserva el decimal para que los botones +/− y dupsRemaining() sigan exactos.
+      const pctShown = Math.round(c.skillPct);
       const div = document.createElement("div");
       div.className = "char-card " + (isArchived ? "archived" : isMax ? "maxed" : "normal");
 
@@ -826,7 +841,7 @@ function render() {
       for (let i = 0; i < c.skillMax; i++) {
         if (isMax) barHTML += '<div class="skill-pip filled"></div>';
         else if (i < c.skillCurrent - 1) barHTML += '<div class="skill-pip filled"></div>';
-        else if (i === c.skillCurrent - 1) barHTML += `<div class="skill-pip"><div class="skill-pip-inner" style="width:${c.skillPct}%"></div></div>`;
+        else if (i === c.skillCurrent - 1) barHTML += `<div class="skill-pip"><div class="skill-pip-inner" style="width:${pctShown}%"></div></div>`;
         else barHTML += '<div class="skill-pip"></div>';
       }
       barHTML += `<span class="skill-level-text">${c.skillCurrent}/${c.skillMax}</span></div>`;
@@ -842,7 +857,7 @@ function render() {
         </div>
         ${!isArchived ? `<div class="char-controls">
           ${!isMax ? `<label>Bar %:</label>
-          <input type="text" inputmode="numeric" class="char-pct-input" value="${c.skillPct}" onchange="updateCharPct('${c.id}',this.value)" placeholder="0–99">` : ''}
+          <input type="text" inputmode="numeric" class="char-pct-input" value="${pctShown}" onchange="updateCharPct('${c.id}',this.value)" placeholder="0–99">` : ''}
           <div class="char-btn-group">
             <button class="char-btn" onclick="changeCharDupe('${c.id}',-1)" aria-label="Remove one dupe">−</button>
             <button class="char-btn" onclick="changeCharDupe('${c.id}',1)" aria-label="Add one dupe" ${isMax ? 'disabled' : ''}>+</button>
