@@ -357,6 +357,29 @@ function migrateOldDate(dateStr) {
   return Date.now();
 }
 
+// Si el catálogo cambió los upgrades (o skillMax) de un personaje que ya existe en el
+// estado guardado, los alinea con el catálogo conservando los DUPES ya conseguidos en el
+// nivel actual (no el %), y recalcula el % contra el nuevo requisito. El nivel no cambia
+// (salvo que quede por encima del nuevo skillMax).
+function syncCharWithCatalog(c, def) {
+  const sameUpgrades = Array.isArray(c.upgrades) && JSON.stringify(c.upgrades) === JSON.stringify(def.upgrades);
+  if (sameUpgrades && c.skillMax === def.skillMax) return;
+  let done = 0;
+  if (Array.isArray(c.upgrades) && c.skillCurrent < c.skillMax && c.upgrades[c.skillCurrent]) {
+    done = Math.round((c.skillPct / 100) * c.upgrades[c.skillCurrent]);
+  }
+  c.upgrades = def.upgrades.slice();
+  c.skillMax = def.skillMax;
+  if (c.skillCurrent > c.skillMax) c.skillCurrent = c.skillMax;
+  if (c.skillCurrent >= c.skillMax) {
+    c.skillPct = 0;
+  } else {
+    const needed = c.upgrades[c.skillCurrent];
+    done = Math.max(0, Math.min(done, needed - 1));
+    c.skillPct = Math.round((done / needed) * 1000) / 10;
+  }
+}
+
 // Se corre después de cargar/bajar/sincronizar estado o config, para que
 // state.chars y state.capsules siempre reflejen lo que hay en MONTHS actual
 // (sin importar si MONTHS viene del fallback hardcodeado o de Sheets vía syncConfig).
@@ -368,6 +391,8 @@ function ensureCharsAndCapsulesExist(target) {
     const existing = target.chars.find(c => c.id === def.id);
     if (!existing) {
       target.chars.push(JSON.parse(JSON.stringify(def)));
+    } else {
+      syncCharWithCatalog(existing, def);
     }
   });
   // Migraciones de nombre heredadas (para estados ya guardados con nombres viejos).
@@ -832,8 +857,9 @@ function render() {
       if (group.isActive) totalDups += dups;
       const isMax = c.skillCurrent >= c.skillMax;
       const isArchived = !group.isActive;
-      // Solo para mostrar: el valor interno conserva el decimal para que los botones +/− y dupsRemaining() sigan exactos.
-      const pctShown = Math.round(c.skillPct);
+      // Solo para mostrar: siempre se redondea hacia abajo (37.5% → 37%). El valor interno
+      // conserva el decimal para que los botones +/− y dupsRemaining() sigan exactos.
+      const pctShown = Math.floor(c.skillPct + 1e-9);
       const div = document.createElement("div");
       div.className = "char-card " + (isArchived ? "archived" : isMax ? "maxed" : "normal");
 
